@@ -107,135 +107,175 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 		return AGENCY_COLOR;
 	}
 
+	private static final String ROUTE_SN_1 = "1";
+	private static final String ROUTE_SN_2 = "2";
+	private static final String ROUTE_SN_2W = "2W";
+	private static final String ROUTE_SN_3A = "3A";
+	private static final String ROUTE_SN_3C = "3C";
+	private static final String ROUTE_SN_3J = "3J";
+	private static final String ROUTE_SN_3M = "3M";
+	private static final String ROUTE_SN_3N = "3N";
+	private static final String ROUTE_SN_4 = "4";
+	private static final String ROUTE_SN_6 = "6";
+	private static final String ROUTE_SN_7 = "7";
+	private static final String ROUTE_SN_8 = "8";
+	private static final String ROUTE_SN_9 = "9";
+	private static final String ROUTE_SN_11 = "11";
+	private static final String ROUTE_SN_12 = "12";
+	private static final String ROUTE_SN_13 = "13";
+	private static final String ROUTE_SN_20 = "20";
+
+	private static final String SHERWOOD = "Sherwood";
+	private static final String WESTFORT = "Westfort";
+	private static final String CURRENT_RIVER = "Current River";
+	private static final String AIRPORT = "Airport";
+	private static final String JUMBO_GARDENS = "Jumbo Gardens";
+	private static final String COUNTY_PARK = "County Park";
+	private static final String NORTHWOOD = "Northwood";
+	private static final String NEEBING = "Neebing";
+	private static final String MISSION = "Mission";
+	private static final String SHUNIAH = "Shuniah";
+	private static final String COLLEGE = "College";
+	private static final String CITY_HALL = "City Hall";
+	private static final String UNIVERSITY = "University";
+	private static final String INTERCITY = "Intercity";
+	private static final String COLLEGE_S_INTERCITY = COLLEGE + " / " + INTERCITY;
+	private static final String UNIVERSITY_S_INTERCITY = UNIVERSITY + " / " + INTERCITY;
+	private static final String WINDSOR = "Windsor";
+	private static final String EAST_END = "East End";
+	private static final String WATERFRONT = "Waterfront";
+	private static final String WATERFRONT_COLLEGE = WATERFRONT + " (" + COLLEGE + ")";
+	private static final String COUNTY_FAIR = "County Fair";
+	private static final String EXPRESS = "Express";
+
 	@Override
 	public void setTripHeadsign(MRoute route, MTrip mTrip, GTrip gTrip) {
 		String stationName = null;
 		int directionId = -1;
 		String routeShortName = route.shortName;
-		if ("1".equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith("Westfort") || gTrip.trip_headsign.endsWith("City Hall")) {
+		if (ROUTE_SN_1.equals(routeShortName)) {
+			if (gTrip.trip_headsign.endsWith(WESTFORT) || gTrip.trip_headsign.endsWith(CITY_HALL)) {
 				directionId = 0;
-				stationName = "Westfort"; // South
-			} else if (gTrip.trip_headsign.endsWith("Current River") || gTrip.trip_headsign.endsWith("Waterfront")) {
+				stationName = WESTFORT; // South
+			} else if (gTrip.trip_headsign.endsWith(CURRENT_RIVER) || gTrip.trip_headsign.endsWith(WATERFRONT)) {
 				directionId = 1;
-				stationName = "Current River"; // North
+				stationName = CURRENT_RIVER; // North
 			}
-		} else if ("2".equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith("City Hall")) {
+		} else if (ROUTE_SN_2.equals(routeShortName)) {
+			if (gTrip.trip_headsign.endsWith(CITY_HALL)) {
 				directionId = 0;
-				stationName = "City Hall"; // South
-			} else if (gTrip.trip_headsign.endsWith("Waterfront")) {
+				stationName = CITY_HALL; // South
+			} else if (gTrip.trip_headsign.endsWith(WATERFRONT)) {
 				directionId = 1;
-				stationName = "Waterfront"; // North
+				stationName = WATERFRONT; // North
 			}
-		} else if ("2W".equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith("College") || gTrip.trip_headsign.endsWith("Waterfront")) {
+		} else if (ROUTE_SN_2W.equals(routeShortName)) {
+			if (gTrip.trip_headsign.endsWith(COLLEGE) || gTrip.trip_headsign.endsWith(WATERFRONT)) {
 				directionId = 0;
-				stationName = "Waterfront (College)"; // North
-			} else if (gTrip.trip_headsign.endsWith("Westfort")) {
+				stationName = WATERFRONT_COLLEGE; // North
+			} else if (gTrip.trip_headsign.endsWith(WESTFORT)) {
 				directionId = 1;
-				stationName = "Westfort"; // South
+				stationName = WESTFORT; // South
 			}
-		} else if ("3A".equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith("Airport")) {
+		} else if (ROUTE_SN_3A.equals(routeShortName)) {
+			if (gTrip.trip_headsign.endsWith(AIRPORT)) {
 				directionId = 0;
-				stationName = "Airport"; // West
-			} else if (gTrip.trip_headsign.endsWith("City Hall") || gTrip.trip_headsign.endsWith("Jumbo Gardens") || gTrip.trip_headsign.endsWith("Waterfront")) {
+				stationName = AIRPORT; // West
+			} else if (gTrip.trip_headsign.endsWith(CITY_HALL) || gTrip.trip_headsign.endsWith(JUMBO_GARDENS) || gTrip.trip_headsign.endsWith(WATERFRONT)) {
 				directionId = 1;
-				stationName = "City Hall"; // East
+				stationName = CITY_HALL; // East
 			}
-		} else if ("3C".equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith("County Park")) {
+		} else if (ROUTE_SN_3C.equals(routeShortName)) {
+			if (gTrip.trip_headsign.endsWith(COUNTY_PARK)) {
 				directionId = 0;
 				stationName = "Castlegreen"; // North / West
-			} else if (gTrip.trip_headsign.endsWith("Waterfront") || gTrip.trip_headsign.endsWith("City Hall") || gTrip.trip_headsign.endsWith("Northwood")) {
+			} else if (gTrip.trip_headsign.endsWith(WATERFRONT) || gTrip.trip_headsign.endsWith(CITY_HALL) || gTrip.trip_headsign.endsWith(NORTHWOOD)) {
 				directionId = 1;
-				stationName = "Waterfront"; // South / East
+				stationName = WATERFRONT; // South / East
 			}
-		} else if ("3J".equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith("Waterfront") || gTrip.trip_headsign.endsWith("Airport")) {
+		} else if (ROUTE_SN_3J.equals(routeShortName)) {
+			if (gTrip.trip_headsign.endsWith(WATERFRONT) || gTrip.trip_headsign.endsWith(AIRPORT)) {
 				directionId = 0;
-				stationName = "Waterfront"; // South / East
-			} else if (gTrip.trip_headsign.endsWith("Jumbo Gardens")) {
+				stationName = WATERFRONT; // South / East
+			} else if (gTrip.trip_headsign.endsWith(JUMBO_GARDENS)) {
 				directionId = 1;
-				stationName = "Sherwood"; // North / West
+				stationName = SHERWOOD; // North / West
 			}
-		} else if ("3M".equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith("City Hall") || gTrip.trip_headsign.endsWith("Airport") || gTrip.trip_headsign.endsWith("Northwood")) {
+		} else if (ROUTE_SN_3M.equals(routeShortName)) {
+			if (gTrip.trip_headsign.endsWith(CITY_HALL) || gTrip.trip_headsign.endsWith(AIRPORT) || gTrip.trip_headsign.endsWith(NORTHWOOD)) {
 				directionId = 0;
-				stationName = "City Hall"; // South
-			} else if (gTrip.trip_headsign.endsWith("Waterfront") || gTrip.trip_headsign.endsWith("County Park")
-					|| gTrip.trip_headsign.endsWith("Jumbo Gardens")) {
+				stationName = CITY_HALL; // South
+			} else if (gTrip.trip_headsign.endsWith(WATERFRONT) || gTrip.trip_headsign.endsWith(COUNTY_PARK) || gTrip.trip_headsign.endsWith(JUMBO_GARDENS)) {
 				directionId = 1;
-				stationName = "Waterfront"; // North
+				stationName = WATERFRONT; // North
 			}
-		} else if ("3N".equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith("County Park") || gTrip.trip_headsign.endsWith("Waterfront")) {
+		} else if (ROUTE_SN_3N.equals(routeShortName)) {
+			if (gTrip.trip_headsign.endsWith(COUNTY_PARK) || gTrip.trip_headsign.endsWith(WATERFRONT)) {
 				directionId = 0;
-				stationName = "City Hall"; // South / East
-			} else if (gTrip.trip_headsign.endsWith("Northwood")) {
+				stationName = CITY_HALL; // South / East
+			} else if (gTrip.trip_headsign.endsWith(NORTHWOOD)) {
 				directionId = 1;
-				stationName = "College"; // North / West
+				stationName = COLLEGE; // North / West
 			}
-		} else if ("4".equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith("Neebing")) {
+		} else if (ROUTE_SN_4.equals(routeShortName)) {
+			if (gTrip.trip_headsign.endsWith(NEEBING)) {
 				directionId = 0;
-				stationName = "Neebing"; // Circle
+				stationName = NEEBING; // Circle
 			}
-		} else if ("6".equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith("Mission")) {
+		} else if (ROUTE_SN_6.equals(routeShortName)) {
+			if (gTrip.trip_headsign.endsWith(MISSION)) {
 				directionId = 0;
-				stationName = "Mission"; // Circle
+				stationName = MISSION; // Circle
 			}
-		} else if ("7".equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith("Shuniah")) {
+		} else if (ROUTE_SN_7.equals(routeShortName)) {
+			if (gTrip.trip_headsign.endsWith(SHUNIAH)) {
 				directionId = 0;
-				stationName = "Shuniah"; // North
-			} else if (gTrip.trip_headsign.endsWith("Waterfront")) {
+				stationName = SHUNIAH; // North
+			} else if (gTrip.trip_headsign.endsWith(WATERFRONT)) {
 				directionId = 1;
-				stationName = "Waterfront"; // South
+				stationName = WATERFRONT; // South
 			}
-		} else if ("8".equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith("Intercity") || gTrip.trip_headsign.endsWith("College")) {
+		} else if (ROUTE_SN_8.equals(routeShortName)) {
+			if (gTrip.trip_headsign.endsWith(INTERCITY) || gTrip.trip_headsign.endsWith(COLLEGE)) {
 				directionId = 0;
-				stationName = "College / Intercity"; // North
-			} else if (gTrip.trip_headsign.endsWith("City Hall")) {
+				stationName = COLLEGE_S_INTERCITY; // North
+			} else if (gTrip.trip_headsign.endsWith(CITY_HALL)) {
 				directionId = 1;
-				stationName = "City Hall"; // South
+				stationName = CITY_HALL; // South
 			}
-		} else if ("9".equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith("Intercity") || gTrip.trip_headsign.endsWith("University")) {
+		} else if (ROUTE_SN_9.equals(routeShortName)) {
+			if (gTrip.trip_headsign.endsWith(INTERCITY) || gTrip.trip_headsign.endsWith(UNIVERSITY)) {
 				directionId = 0;
-				stationName = "University / Intercity"; // South
-			} else if (gTrip.trip_headsign.endsWith("Waterfront")) {
+				stationName = UNIVERSITY_S_INTERCITY; // South
+			} else if (gTrip.trip_headsign.endsWith(WATERFRONT)) {
 				directionId = 1;
-				stationName = "Waterfront"; // North
+				stationName = WATERFRONT; // North
 			}
-		} else if ("11".equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith("Windsor")) {
+		} else if (ROUTE_SN_11.equals(routeShortName)) {
+			if (gTrip.trip_headsign.endsWith(WINDSOR)) {
 				directionId = 0;
-				stationName = "Windsor"; // West
-			} else if (gTrip.trip_headsign.endsWith("Waterfront")) {
+				stationName = WINDSOR; // West
+			} else if (gTrip.trip_headsign.endsWith(WATERFRONT)) {
 				directionId = 1;
-				stationName = "Waterfront"; // East
+				stationName = WATERFRONT; // East
 			}
-		} else if ("12".equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith("East End")) {
+		} else if (ROUTE_SN_12.equals(routeShortName)) {
+			if (gTrip.trip_headsign.endsWith(EAST_END)) {
 				directionId = 0;
-				stationName = "East End"; // Circle
+				stationName = EAST_END; // Circle
 			}
-		} else if ("13".equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith("County Fair")) {
+		} else if (ROUTE_SN_13.equals(routeShortName)) {
+			if (gTrip.trip_headsign.endsWith(COUNTY_FAIR)) {
 				directionId = 0;
-				stationName = "County Fair"; // North / West
-			} else if (gTrip.trip_headsign.endsWith("Waterfront")) {
+				stationName = COUNTY_FAIR; // North / West
+			} else if (gTrip.trip_headsign.endsWith(WATERFRONT)) {
 				directionId = 1;
-				stationName = "Waterfront"; // South / East
+				stationName = WATERFRONT; // South / East
 			}
-		} else if ("20".equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith("Express")) {
+		} else if (ROUTE_SN_20.equals(routeShortName)) {
+			if (gTrip.trip_headsign.endsWith(EXPRESS)) {
 				directionId = 0;
-				stationName = "Express"; // Circle
+				stationName = EXPRESS; // Circle
 			}
 		}
 		if (stationName == null || directionId < 0) {
@@ -248,6 +288,39 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	@Override
 	public String cleanTripHeadsign(String tripHeadsign) {
 		return MSpec.cleanLabel(tripHeadsign);
+	}
+
+	private static final Pattern FIRST = Pattern.compile("(first)", Pattern.CASE_INSENSITIVE);
+	private static final String FIRST_REPLACEMENT = "1st";
+	private static final Pattern SECOND = Pattern.compile("(second)", Pattern.CASE_INSENSITIVE);
+	private static final String SECOND_REPLACEMENT = "2nd";
+	private static final Pattern THIRD = Pattern.compile("(third)", Pattern.CASE_INSENSITIVE);
+	private static final String THIRD_REPLACEMENT = "3rd";
+	private static final Pattern FOURTH = Pattern.compile("(fourth)", Pattern.CASE_INSENSITIVE);
+	private static final String FOURTH_REPLACEMENT = "4th";
+	private static final Pattern FIFTH = Pattern.compile("(fifth)", Pattern.CASE_INSENSITIVE);
+	private static final String FIFTH_REPLACEMENT = "5th";
+	private static final Pattern SIXTH = Pattern.compile("(sixth)", Pattern.CASE_INSENSITIVE);
+	private static final String SIXTH_REPLACEMENT = "6th";
+	private static final Pattern SEVENTH = Pattern.compile("(seventh)", Pattern.CASE_INSENSITIVE);
+	private static final String SEVENTH_REPLACEMENT = "7th";
+	private static final Pattern EIGHTH = Pattern.compile("(eighth)", Pattern.CASE_INSENSITIVE);
+	private static final String EIGHTH_REPLACEMENT = "8th";
+	private static final Pattern NINTH = Pattern.compile("(ninth)", Pattern.CASE_INSENSITIVE);
+	private static final String NINTH_REPLACEMENT = "9th";
+
+	@Override
+	public String cleanStopName(String gStopName) {
+		gStopName = FIRST.matcher(gStopName).replaceAll(FIRST_REPLACEMENT);
+		gStopName = SECOND.matcher(gStopName).replaceAll(SECOND_REPLACEMENT);
+		gStopName = THIRD.matcher(gStopName).replaceAll(THIRD_REPLACEMENT);
+		gStopName = FOURTH.matcher(gStopName).replaceAll(FOURTH_REPLACEMENT);
+		gStopName = FIFTH.matcher(gStopName).replaceAll(FIFTH_REPLACEMENT);
+		gStopName = SIXTH.matcher(gStopName).replaceAll(SIXTH_REPLACEMENT);
+		gStopName = SEVENTH.matcher(gStopName).replaceAll(SEVENTH_REPLACEMENT);
+		gStopName = EIGHTH.matcher(gStopName).replaceAll(EIGHTH_REPLACEMENT);
+		gStopName = NINTH.matcher(gStopName).replaceAll(NINTH_REPLACEMENT);
+		return MSpec.cleanLabel(gStopName);
 	}
 
 	@Override
