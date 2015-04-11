@@ -210,7 +210,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 				stationName = WATERFRONT; // North
 			}
 		} else if (ROUTE_SN_3N.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(COUNTY_PARK) || gTrip.trip_headsign.endsWith(WATERFRONT)) {
+			if (gTrip.trip_headsign.endsWith(COUNTY_PARK) || gTrip.trip_headsign.endsWith(WATERFRONT) || gTrip.trip_headsign.endsWith(CITY_HALL)) {
 				directionId = 0;
 				stationName = CITY_HALL; // South / East
 			} else if (gTrip.trip_headsign.endsWith(NORTHWOOD)) {
