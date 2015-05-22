@@ -9,6 +9,7 @@ import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GRoute;
+import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GTrip;
 import org.mtransit.parser.mt.data.MAgency;
@@ -149,10 +150,10 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	private static final String EXPRESS = "Express";
 
 	@Override
-	public void setTripHeadsign(MRoute route, MTrip mTrip, GTrip gTrip) {
+	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
 		String stationName = null;
 		int directionId = -1;
-		String routeShortName = route.shortName;
+		String routeShortName = mRoute.shortName;
 		if (ROUTE_SN_1.equals(routeShortName)) {
 			if (gTrip.trip_headsign.endsWith(WESTFORT) || gTrip.trip_headsign.endsWith(CITY_HALL)) {
 				directionId = 0;
