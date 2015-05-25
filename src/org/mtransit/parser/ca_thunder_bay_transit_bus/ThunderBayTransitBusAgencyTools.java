@@ -73,6 +73,14 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 
 	private static final Pattern DIGITS = Pattern.compile("[\\d]+");
 
+	private static final String A = "A";
+	private static final String C = "C";
+	private static final String J = "J";
+	private static final String M = "M";
+	private static final String N = "N";
+	private static final String S = "S";
+	private static final String W = "W";
+
 	@Override
 	public long getRouteId(GRoute gRoute) {
 		String routeId = gRoute.route_id;
@@ -82,23 +90,35 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 		Matcher matcher = DIGITS.matcher(routeId);
 		matcher.find();
 		int digits = Integer.parseInt(matcher.group());
-		if (routeId.endsWith("A")) {
+		if (routeId.endsWith(A)) {
 			return 1000 + digits;
-		} else if (routeId.endsWith("C")) {
+		} else if (routeId.endsWith(C)) {
 			return 3000 + digits;
-		} else if (routeId.endsWith("J")) {
+		} else if (routeId.endsWith(J)) {
 			return 10000 + digits;
-		} else if (routeId.endsWith("M")) {
+		} else if (routeId.endsWith(M)) {
 			return 13000 + digits;
-		} else if (routeId.endsWith("N")) {
+		} else if (routeId.endsWith(N)) {
 			return 14000 + digits;
-		} else if (routeId.endsWith("W")) {
+		} else if (routeId.endsWith(S)) {
+			return 19000 + digits;
+		} else if (routeId.endsWith(W)) {
 			return 23000 + digits;
-		} else {
-			System.out.println("Can't find route ID for " + gRoute);
-			System.exit(-1);
-			return -1;
 		}
+		System.out.println("Can't find route ID for " + gRoute);
+		System.exit(-1);
+		return -1l;
+	}
+
+	private static final String COLOR_000000 = "000000";
+	private static final String COLOR_13B5EA = "13B5EA";
+
+	@Override
+	public String getRouteColor(GRoute gRoute) {
+		if (ROUTE_SN_2S.equals(gRoute.route_short_name) && COLOR_000000.equals(gRoute.route_color)) {
+			return COLOR_13B5EA;
+		}
+		return super.getRouteColor(gRoute);
 	}
 
 	private static final String AGENCY_COLOR = "1FB25A";
@@ -111,6 +131,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	private static final String ROUTE_SN_1 = "1";
 	private static final String ROUTE_SN_2 = "2";
 	private static final String ROUTE_SN_2W = "2W";
+	private static final String ROUTE_SN_2S = "2S";
 	private static final String ROUTE_SN_3A = "3A";
 	private static final String ROUTE_SN_3C = "3C";
 	private static final String ROUTE_SN_3J = "3J";
@@ -148,6 +169,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	private static final String WATERFRONT_COLLEGE = WATERFRONT + " (" + COLLEGE + ")";
 	private static final String COUNTY_FAIR = "County Fair";
 	private static final String EXPRESS = "Express";
+	private static final String CASTLEGREEN = "Castlegreen";
 
 	@Override
 	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
@@ -178,6 +200,14 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 				directionId = 1;
 				stationName = WESTFORT; // South
 			}
+		} else if (ROUTE_SN_2S.equals(routeShortName)) {
+			if (gTrip.trip_headsign.endsWith(COLLEGE)) {
+				directionId = 0;
+				stationName = COLLEGE; // North
+			} else if (gTrip.trip_headsign.endsWith(WESTFORT)) {
+				directionId = 1;
+				stationName = WESTFORT; // South
+			}
 		} else if (ROUTE_SN_3A.equals(routeShortName)) {
 			if (gTrip.trip_headsign.endsWith(AIRPORT)) {
 				directionId = 0;
@@ -189,7 +219,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 		} else if (ROUTE_SN_3C.equals(routeShortName)) {
 			if (gTrip.trip_headsign.endsWith(COUNTY_PARK)) {
 				directionId = 0;
-				stationName = "Castlegreen"; // North / West
+				stationName = CASTLEGREEN; // North / West
 			} else if (gTrip.trip_headsign.endsWith(WATERFRONT) || gTrip.trip_headsign.endsWith(CITY_HALL) || gTrip.trip_headsign.endsWith(NORTHWOOD)) {
 				directionId = 1;
 				stationName = WATERFRONT; // South / East
@@ -293,6 +323,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public String cleanStopName(String gStopName) {
+		gStopName = MSpec.cleanStreetTypes(gStopName);
 		gStopName = MSpec.cleanNumbers(gStopName);
 		return MSpec.cleanLabel(gStopName);
 	}
