@@ -35,7 +35,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public void start(String[] args) {
-		System.out.printf("\nGenerating Thunder Bay Transit bus data...\n");
+		System.out.printf("\nGenerating Thunder Bay Transit bus data...");
 		long start = System.currentTimeMillis();
 		this.serviceIds = extractUsefulServiceIds(args, this);
 		super.start(args);
@@ -318,6 +318,8 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public String cleanTripHeadsign(String tripHeadsign) {
+		tripHeadsign = CleanUtils.cleanStreetTypes(tripHeadsign);
+		tripHeadsign = CleanUtils.cleanNumbers(tripHeadsign);
 		return CleanUtils.cleanLabel(tripHeadsign);
 	}
 
