@@ -83,7 +83,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public long getRouteId(GRoute gRoute) {
-		String routeId = gRoute.route_id;
+		String routeId = gRoute.getRouteId();
 		if (routeId != null && routeId.length() > 0 && Utils.isDigitsOnly(routeId)) {
 			return Integer.valueOf(routeId); // using stop code as stop ID
 		}
@@ -115,7 +115,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public String getRouteColor(GRoute gRoute) {
-		if (ROUTE_SN_2S.equals(gRoute.route_short_name) && COLOR_000000.equals(gRoute.route_color)) {
+		if (ROUTE_SN_2S.equals(gRoute.getRouteShortName()) && COLOR_000000.equals(gRoute.getRouteColor())) {
 			return COLOR_13B5EA;
 		}
 		return super.getRouteColor(gRoute);
@@ -177,134 +177,135 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 		int directionId = -1;
 		String routeShortName = mRoute.shortName;
 		if (ROUTE_SN_1.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(WESTFORT) || gTrip.trip_headsign.endsWith(CITY_HALL)) {
+			if (gTrip.getTripHeadsign().endsWith(WESTFORT) || gTrip.getTripHeadsign().endsWith(CITY_HALL)) {
 				directionId = 0;
 				stationName = WESTFORT; // South
-			} else if (gTrip.trip_headsign.endsWith(CURRENT_RIVER) || gTrip.trip_headsign.endsWith(WATERFRONT)) {
+			} else if (gTrip.getTripHeadsign().endsWith(CURRENT_RIVER) || gTrip.getTripHeadsign().endsWith(WATERFRONT)) {
 				directionId = 1;
 				stationName = CURRENT_RIVER; // North
 			}
 		} else if (ROUTE_SN_2.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(CITY_HALL)) {
+			if (gTrip.getTripHeadsign().endsWith(CITY_HALL)) {
 				directionId = 0;
 				stationName = CITY_HALL; // South
-			} else if (gTrip.trip_headsign.endsWith(WATERFRONT)) {
+			} else if (gTrip.getTripHeadsign().endsWith(WATERFRONT)) {
 				directionId = 1;
 				stationName = WATERFRONT; // North
 			}
 		} else if (ROUTE_SN_2W.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(COLLEGE) || gTrip.trip_headsign.endsWith(WATERFRONT)) {
+			if (gTrip.getTripHeadsign().endsWith(COLLEGE) || gTrip.getTripHeadsign().endsWith(WATERFRONT)) {
 				directionId = 0;
 				stationName = WATERFRONT_COLLEGE; // North
-			} else if (gTrip.trip_headsign.endsWith(WESTFORT)) {
+			} else if (gTrip.getTripHeadsign().endsWith(WESTFORT)) {
 				directionId = 1;
 				stationName = WESTFORT; // South
 			}
 		} else if (ROUTE_SN_2S.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(COLLEGE)) {
+			if (gTrip.getTripHeadsign().endsWith(COLLEGE)) {
+				// || gTrip.getTripHeadsign().endsWith(WATERFRONT)
 				directionId = 0;
 				stationName = COLLEGE; // North
-			} else if (gTrip.trip_headsign.endsWith(WESTFORT)) {
+			} else if (gTrip.getTripHeadsign().endsWith(WESTFORT)) {
 				directionId = 1;
 				stationName = WESTFORT; // South
 			}
 		} else if (ROUTE_SN_3A.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(AIRPORT)) {
+			if (gTrip.getTripHeadsign().endsWith(AIRPORT)) {
 				directionId = 0;
 				stationName = AIRPORT; // West
-			} else if (gTrip.trip_headsign.endsWith(CITY_HALL) || gTrip.trip_headsign.endsWith(JUMBO_GARDENS) || gTrip.trip_headsign.endsWith(WATERFRONT)) {
+			} else if (gTrip.getTripHeadsign().endsWith(CITY_HALL) || gTrip.getTripHeadsign().endsWith(JUMBO_GARDENS) || gTrip.getTripHeadsign().endsWith(WATERFRONT)) {
 				directionId = 1;
 				stationName = CITY_HALL; // East
 			}
 		} else if (ROUTE_SN_3C.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(COUNTY_PARK)) {
+			if (gTrip.getTripHeadsign().endsWith(COUNTY_PARK)) {
 				directionId = 0;
 				stationName = CASTLEGREEN; // North / West
-			} else if (gTrip.trip_headsign.endsWith(WATERFRONT) || gTrip.trip_headsign.endsWith(CITY_HALL) || gTrip.trip_headsign.endsWith(NORTHWOOD)) {
+			} else if (gTrip.getTripHeadsign().endsWith(WATERFRONT) || gTrip.getTripHeadsign().endsWith(CITY_HALL) || gTrip.getTripHeadsign().endsWith(NORTHWOOD)) {
 				directionId = 1;
 				stationName = WATERFRONT; // South / East
 			}
 		} else if (ROUTE_SN_3J.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(WATERFRONT) || gTrip.trip_headsign.endsWith(AIRPORT)) {
+			if (gTrip.getTripHeadsign().endsWith(WATERFRONT) || gTrip.getTripHeadsign().endsWith(AIRPORT)) {
 				directionId = 0;
 				stationName = WATERFRONT; // South / East
-			} else if (gTrip.trip_headsign.endsWith(JUMBO_GARDENS)) {
+			} else if (gTrip.getTripHeadsign().endsWith(JUMBO_GARDENS)) {
 				directionId = 1;
 				stationName = SHERWOOD; // North / West
 			}
 		} else if (ROUTE_SN_3M.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(CITY_HALL) || gTrip.trip_headsign.endsWith(AIRPORT) || gTrip.trip_headsign.endsWith(NORTHWOOD)) {
+			if (gTrip.getTripHeadsign().endsWith(CITY_HALL) || gTrip.getTripHeadsign().endsWith(AIRPORT) || gTrip.getTripHeadsign().endsWith(NORTHWOOD)) {
 				directionId = 0;
 				stationName = CITY_HALL; // South
-			} else if (gTrip.trip_headsign.endsWith(WATERFRONT) || gTrip.trip_headsign.endsWith(COUNTY_PARK) || gTrip.trip_headsign.endsWith(JUMBO_GARDENS)) {
+			} else if (gTrip.getTripHeadsign().endsWith(WATERFRONT) || gTrip.getTripHeadsign().endsWith(COUNTY_PARK) || gTrip.getTripHeadsign().endsWith(JUMBO_GARDENS)) {
 				directionId = 1;
 				stationName = WATERFRONT; // North
 			}
 		} else if (ROUTE_SN_3N.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(COUNTY_PARK) || gTrip.trip_headsign.endsWith(WATERFRONT) || gTrip.trip_headsign.endsWith(CITY_HALL)) {
+			if (gTrip.getTripHeadsign().endsWith(COUNTY_PARK) || gTrip.getTripHeadsign().endsWith(WATERFRONT) || gTrip.getTripHeadsign().endsWith(CITY_HALL)) {
 				directionId = 0;
 				stationName = CITY_HALL; // South / East
-			} else if (gTrip.trip_headsign.endsWith(NORTHWOOD)) {
+			} else if (gTrip.getTripHeadsign().endsWith(NORTHWOOD)) {
 				directionId = 1;
 				stationName = COLLEGE; // North / West
 			}
 		} else if (ROUTE_SN_4.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(NEEBING)) {
+			if (gTrip.getTripHeadsign().endsWith(NEEBING)) {
 				directionId = 0;
 				stationName = NEEBING; // Circle
 			}
 		} else if (ROUTE_SN_6.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(MISSION)) {
+			if (gTrip.getTripHeadsign().endsWith(MISSION)) {
 				directionId = 0;
 				stationName = MISSION; // Circle
 			}
 		} else if (ROUTE_SN_7.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(SHUNIAH)) {
+			if (gTrip.getTripHeadsign().endsWith(SHUNIAH)) {
 				directionId = 0;
 				stationName = SHUNIAH; // North
-			} else if (gTrip.trip_headsign.endsWith(WATERFRONT)) {
+			} else if (gTrip.getTripHeadsign().endsWith(WATERFRONT)) {
 				directionId = 1;
 				stationName = WATERFRONT; // South
 			}
 		} else if (ROUTE_SN_8.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(INTERCITY) || gTrip.trip_headsign.endsWith(COLLEGE)) {
+			if (gTrip.getTripHeadsign().endsWith(INTERCITY) || gTrip.getTripHeadsign().endsWith(COLLEGE)) {
 				directionId = 0;
 				stationName = COLLEGE_S_INTERCITY; // North
-			} else if (gTrip.trip_headsign.endsWith(CITY_HALL)) {
+			} else if (gTrip.getTripHeadsign().endsWith(CITY_HALL)) {
 				directionId = 1;
 				stationName = CITY_HALL; // South
 			}
 		} else if (ROUTE_SN_9.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(INTERCITY) || gTrip.trip_headsign.endsWith(UNIVERSITY)) {
+			if (gTrip.getTripHeadsign().endsWith(INTERCITY) || gTrip.getTripHeadsign().endsWith(UNIVERSITY)) {
 				directionId = 0;
 				stationName = UNIVERSITY_S_INTERCITY; // South
-			} else if (gTrip.trip_headsign.endsWith(WATERFRONT)) {
+			} else if (gTrip.getTripHeadsign().endsWith(WATERFRONT)) {
 				directionId = 1;
 				stationName = WATERFRONT; // North
 			}
 		} else if (ROUTE_SN_11.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(WINDSOR)) {
+			if (gTrip.getTripHeadsign().endsWith(WINDSOR)) {
 				directionId = 0;
 				stationName = WINDSOR; // West
-			} else if (gTrip.trip_headsign.endsWith(WATERFRONT)) {
+			} else if (gTrip.getTripHeadsign().endsWith(WATERFRONT)) {
 				directionId = 1;
 				stationName = WATERFRONT; // East
 			}
 		} else if (ROUTE_SN_12.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(EAST_END)) {
+			if (gTrip.getTripHeadsign().endsWith(EAST_END)) {
 				directionId = 0;
 				stationName = EAST_END; // Circle
 			}
 		} else if (ROUTE_SN_13.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(COUNTY_FAIR)) {
+			if (gTrip.getTripHeadsign().endsWith(COUNTY_FAIR)) {
 				directionId = 0;
 				stationName = COUNTY_FAIR; // North / West
-			} else if (gTrip.trip_headsign.endsWith(WATERFRONT)) {
+			} else if (gTrip.getTripHeadsign().endsWith(WATERFRONT)) {
 				directionId = 1;
 				stationName = WATERFRONT; // South / East
 			}
 		} else if (ROUTE_SN_20.equals(routeShortName)) {
-			if (gTrip.trip_headsign.endsWith(EXPRESS)) {
+			if (gTrip.getTripHeadsign().endsWith(EXPRESS)) {
 				directionId = 0;
 				stationName = EXPRESS; // Circle
 			}
@@ -332,12 +333,12 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public String getStopCode(GStop gStop) {
-		return gStop.stop_id; // using stop ID as stop code
+		return gStop.getStopId(); // using stop ID as stop code
 	}
 
 	@Override
 	public int getStopId(GStop gStop) {
-		String stopId = gStop.stop_id;
+		String stopId = gStop.getStopId();
 		if (stopId != null && stopId.length() > 0 && Utils.isDigitsOnly(stopId)) {
 			return Integer.valueOf(stopId); // using stop code as stop ID
 		}
