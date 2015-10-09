@@ -222,7 +222,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
 		String stationName = null;
 		int directionId = -1;
-		String routeShortName = mRoute.shortName;
+		String routeShortName = mRoute.getShortName();
 		String tripHeadsignLC = gTrip.getTripHeadsign().toLowerCase(Locale.ENGLISH);
 		if (ROUTE_SN_1.equals(routeShortName)) {
 			if (tripHeadsignLC.endsWith(WESTFORT_LC) || tripHeadsignLC.endsWith(CITY_HALL_LC)) {
