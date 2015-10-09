@@ -113,6 +113,10 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public String getRouteLongName(GRoute gRoute) {
+		return cleanRouteLongName(gRoute);
+	}
+
+	private String cleanRouteLongName(GRoute gRoute) {
 		String routeLongName = gRoute.getRouteLongName();
 		routeLongName = routeLongName.toLowerCase(Locale.ENGLISH);
 		return CleanUtils.cleanLabel(routeLongName);
@@ -159,6 +163,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	private static final String ROUTE_SN_16 = "16";
 	private static final String ROUTE_SN_20 = "20";
 
+	private static final String SLASH = " / ";
 	private static final String SHERWOOD = "Sherwood";
 	private static final String SHERWOOD_LC = SHERWOOD.toLowerCase(Locale.ENGLISH);
 	private static final String SHERWOOD_DR = "Sherwood Dr.";
@@ -193,8 +198,8 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	private static final String UNIVERSITY_LC = UNIVERSITY.toLowerCase(Locale.ENGLISH);
 	private static final String INTERCITY = "Intercity";
 	private static final String INTERCITY_LC = INTERCITY.toLowerCase(Locale.ENGLISH);
-	private static final String COLLEGE_S_INTERCITY = COLLEGE + " / " + INTERCITY;
-	private static final String UNIVERSITY_S_INTERCITY = UNIVERSITY + " / " + INTERCITY;
+	private static final String COLLEGE_S_INTERCITY = COLLEGE + SLASH + INTERCITY;
+	private static final String UNIVERSITY_S_INTERCITY = UNIVERSITY + SLASH + INTERCITY;
 	private static final String WINDSOR = "Windsor";
 	private static final String WINDSOR_LC = WINDSOR.toLowerCase(Locale.ENGLISH);
 	private static final String WINDSOR_ST = "Windsor St.";
@@ -418,7 +423,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 		if (stopId != null && stopId.length() > 0 && Utils.isDigitsOnly(stopId)) {
 			return Integer.valueOf(stopId); // using stop code as stop ID
 		}
-		System.out.println("Stop doesn't have an ID (start with)! " + gStop);
+		System.out.printf("\nStop doesn't have an ID (start with) %s!\n", gStop);
 		System.exit(-1);
 		return -1;
 	}
