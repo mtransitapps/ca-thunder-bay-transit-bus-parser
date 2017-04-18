@@ -1,20 +1,30 @@
 package org.mtransit.parser.ca_thunder_bay_transit_bus;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.mtransit.parser.DefaultAgencyTools;
+import org.mtransit.parser.Pair;
+import org.mtransit.parser.SplitUtils;
 import org.mtransit.parser.Utils;
+import org.mtransit.parser.SplitUtils.RouteTripSpec;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GTrip;
+import org.mtransit.parser.gtfs.data.GTripStop;
 import org.mtransit.parser.mt.data.MAgency;
+import org.mtransit.parser.mt.data.MDirectionType;
 import org.mtransit.parser.mt.data.MRoute;
+import org.mtransit.parser.mt.data.MTripStop;
 import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.mt.data.MTrip;
 
@@ -86,29 +96,30 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	public long getRouteId(GRoute gRoute) {
 		String routeId = gRoute.getRouteId();
 		if (routeId != null && routeId.length() > 0 && Utils.isDigitsOnly(routeId)) {
-			return Integer.valueOf(routeId);
+			return Long.parseLong(routeId);
 		}
 		Matcher matcher = DIGITS.matcher(routeId);
-		matcher.find();
-		int digits = Integer.parseInt(matcher.group());
-		if (routeId.endsWith(A)) {
-			return 1000 + digits;
-		} else if (routeId.endsWith(C)) {
-			return 3000 + digits;
-		} else if (routeId.endsWith(J)) {
-			return 10000 + digits;
-		} else if (routeId.endsWith(M)) {
-			return 13000 + digits;
-		} else if (routeId.endsWith(N)) {
-			return 14000 + digits;
-		} else if (routeId.endsWith(S)) {
-			return 19000 + digits;
-		} else if (routeId.endsWith(W)) {
-			return 23000 + digits;
+		if (matcher.find()) {
+			long digits = Long.parseLong(matcher.group());
+			if (routeId.endsWith(A)) {
+				return 1000L + digits;
+			} else if (routeId.endsWith(C)) {
+				return 3000L + digits;
+			} else if (routeId.endsWith(J)) {
+				return 10000L + digits;
+			} else if (routeId.endsWith(M)) {
+				return 13000L + digits;
+			} else if (routeId.endsWith(N)) {
+				return 14000L + digits;
+			} else if (routeId.endsWith(S)) {
+				return 19000L + digits;
+			} else if (routeId.endsWith(W)) {
+				return 23000L + digits;
+			}
 		}
 		System.out.printf("\nCan't find route ID for %s!", gRoute);
 		System.exit(-1);
-		return -1l;
+		return -1L;
 	}
 
 	@Override
@@ -140,261 +151,356 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 		return AGENCY_COLOR;
 	}
 
-	private static final String ROUTE_SN_1 = "1";
-	private static final String ROUTE_SN_2 = "2";
-	private static final String ROUTE_SN_2W = "2W";
-	private static final String ROUTE_SN_2S = "2S";
-	private static final String ROUTE_SN_3A = "3A";
-	private static final String ROUTE_SN_3C = "3C";
-	private static final String ROUTE_SN_3J = "3J";
-	private static final String ROUTE_SN_3M = "3M";
-	private static final String ROUTE_SN_3N = "3N";
-	private static final String ROUTE_SN_4 = "4";
-	private static final String ROUTE_SN_5 = "5";
-	private static final String ROUTE_SN_6 = "6";
-	private static final String ROUTE_SN_7 = "7";
-	private static final String ROUTE_SN_8 = "8";
-	private static final String ROUTE_SN_9 = "9";
-	private static final String ROUTE_SN_10 = "10";
-	private static final String ROUTE_SN_11 = "11";
-	private static final String ROUTE_SN_12 = "12";
-	private static final String ROUTE_SN_13 = "13";
-	private static final String ROUTE_SN_14 = "14";
-	private static final String ROUTE_SN_16 = "16";
-	private static final String ROUTE_SN_20 = "20";
-
-	private static final String SLASH = " / ";
 	private static final String SHERWOOD = "Sherwood";
-	private static final String SHERWOOD_LC = SHERWOOD.toLowerCase(Locale.ENGLISH);
-	private static final String SHERWOOD_DR = "Sherwood Dr.";
-	private static final String SHERWOOD_DR_LC = SHERWOOD_DR.toLowerCase(Locale.ENGLISH);
 	private static final String WESTFORT = "Westfort";
-	private static final String WESTFORT_LC = WESTFORT.toLowerCase(Locale.ENGLISH);
 	private static final String CURRENT_RIVER = "Current River";
-	private static final String CURRENT_RIVER_LC = CURRENT_RIVER.toLowerCase(Locale.ENGLISH);
 	private static final String AIRPORT = "Airport";
-	private static final String AIRPORT_LC = AIRPORT.toLowerCase(Locale.ENGLISH);
-	private static final String JUMBO_GARDENS = "Jumbo Gardens";
-	private static final String JUMBO_GARDENS_LC = JUMBO_GARDENS.toLowerCase(Locale.ENGLISH);
-	private static final String COUNTY_PARK = "County Park";
-	private static final String COUNTY_PARK_LC = COUNTY_PARK.toLowerCase(Locale.ENGLISH);
-	private static final String NORTHWOOD = "Northwood";
-	private static final String NORTHWOOD_LC = NORTHWOOD.toLowerCase(Locale.ENGLISH);
-	private static final String NEEBING = "Neebing";
-	private static final String NEEBING_LC = NEEBING.toLowerCase(Locale.ENGLISH);
-	private static final String MISSION = "Mission";
-	private static final String MISSION_LC = MISSION.toLowerCase(Locale.ENGLISH);
-	private static final String MISSION_RD = "Mission Rd.";
-	private static final String MISSION_RD_LC = MISSION_RD.toLowerCase(Locale.ENGLISH);
 	private static final String SHUNIAH = "Shuniah";
-	private static final String SHUNIAH_LC = SHUNIAH.toLowerCase(Locale.ENGLISH);
-	private static final String SHUNIAH_ST = "Shuniah St.";
-	private static final String SHUNIAH_ST_LC = SHUNIAH_ST.toLowerCase(Locale.ENGLISH);
 	private static final String COLLEGE = "College";
-	private static final String COLLEGE_LC = COLLEGE.toLowerCase(Locale.ENGLISH);
 	private static final String CITY_HALL = "City Hall";
-	private static final String CITY_HALL_LC = CITY_HALL.toLowerCase(Locale.ENGLISH);
-	private static final String UNIVERSITY = "University";
-	private static final String UNIVERSITY_LC = UNIVERSITY.toLowerCase(Locale.ENGLISH);
 	private static final String INTERCITY = "Intercity";
-	private static final String INTERCITY_LC = INTERCITY.toLowerCase(Locale.ENGLISH);
-	private static final String COLLEGE_S_INTERCITY = COLLEGE + SLASH + INTERCITY;
-	private static final String UNIVERSITY_S_INTERCITY = UNIVERSITY + SLASH + INTERCITY;
 	private static final String WINDSOR = "Windsor";
-	private static final String WINDSOR_LC = WINDSOR.toLowerCase(Locale.ENGLISH);
-	private static final String WINDSOR_ST = "Windsor St.";
-	private static final String WINDSOR_ST_LC = WINDSOR_ST.toLowerCase(Locale.ENGLISH);
-	private static final String EAST_END = "East End";
-	private static final String EAST_END_LC = EAST_END.toLowerCase(Locale.ENGLISH);
 	private static final String WATERFRONT = "Waterfront";
-	private static final String WATERFRONT_LC = WATERFRONT.toLowerCase(Locale.ENGLISH);
-	private static final String WATERFRONT_COLLEGE = WATERFRONT + " (" + COLLEGE + ")";
 	private static final String COUNTY_FAIR = "County Fair";
-	private static final String COUNTY_FAIR_LC = COUNTY_FAIR.toLowerCase(Locale.ENGLISH);
-	private static final String EXPRESS = "Express";
-	private static final String EXPRESS_LC = EXPRESS.toLowerCase(Locale.ENGLISH);
 	private static final String CASTLEGREEN = "Castlegreen";
-	private static final String CASTLEGREEN_LC = CASTLEGREEN.toLowerCase(Locale.ENGLISH);
-	private static final String CASTLEGREEN_DR = "Castlegreen Dr";
-	private static final String CASTLEGREEN_DR_LC = CASTLEGREEN_DR.toLowerCase(Locale.ENGLISH);
+	private static HashMap<Long, RouteTripSpec> ALL_ROUTE_TRIPS2;
+	static {
+		HashMap<Long, RouteTripSpec> map2 = new HashMap<Long, RouteTripSpec>();
+		map2.put(1L, new RouteTripSpec(1L, //
+				0, MTrip.HEADSIGN_TYPE_STRING, WESTFORT, //
+				1, MTrip.HEADSIGN_TYPE_STRING, CURRENT_RIVER) //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"1150", // Cowan & Hodder
+								"1121", // Waterfront Terminal
+								"1000", // Ft. Wm. Rd. & Transit Office (SB)
+								"1019", // City Hall Terminal
+								"1054", // Mary & Neebing
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"1054", // Mary & Neebing
+								"1066", // Brown & Frederica
+								"1019", // City Hall Terminal
+								"1121", // Waterfront Terminal
+								"1150", // Cowan & Hodder
+						})) //
+				.compileBothTripSort());
+		map2.put(2L, new RouteTripSpec(2L, //
+				0, MTrip.HEADSIGN_TYPE_STRING, COLLEGE, //
+				1, MTrip.HEADSIGN_TYPE_STRING, WATERFRONT) //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"1121", // Waterfront Terminal
+								"1207", // John & Machar
+								"1231", // Confederation College
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"1231", // Confederation College
+								"1115", // Court & John
+								"1121", // Waterfront Terminal
+						})) //
+				.compileBothTripSort());
+		map2.put(3L + 3000L, new RouteTripSpec(3L + 3000L, // 3C
+				0, MTrip.HEADSIGN_TYPE_STRING, CASTLEGREEN, //
+				1, MTrip.HEADSIGN_TYPE_STRING, WATERFRONT) //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"1121", // Waterfront Terminal
+								"1373", // ++
+								"1390", // Castlegreen & Superiorview
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"1390", // Castlegreen & Superiorview
+								"1424", // ++
+								"1121", // Waterfront Terminal
+						})) //
+				.compileBothTripSort());
+		map2.put(3L + 10000L, new RouteTripSpec(3L + 10000L, // 3J
+				0, MTrip.HEADSIGN_TYPE_STRING, WATERFRONT, //
+				1, MTrip.HEADSIGN_TYPE_STRING, SHERWOOD) //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"1418", // Sherwood & Valley
+								"1430", // ==
+								"1365", // !=
+								"1366", // !=
+								"1431", // ==
+								"1121", // Waterfront Terminal
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"1121", // Waterfront Terminal
+								"1371", // ++
+								"1418", // Sherwood & Valley
+						})) //
+				.compileBothTripSort());
+		map2.put(3L + 13000L, new RouteTripSpec(3L + 13000L, // 3M
+				0, MTrip.HEADSIGN_TYPE_STRING, CITY_HALL, //
+				1, MTrip.HEADSIGN_TYPE_STRING, WATERFRONT) //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"1121", // Waterfront Terminal
+								"1803", // == Memorial & 13th
+								"1804", // != Memorial & Dunlop
+								"1805", // != Memorial & Isabel
+								"1005", // != Ft. Wm. Rd. & Sears
+								"1006", // != Intercity Shopping Centre
+								"1806", // == May & William
+								"1019", // City Hall Terminal
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"1019", // City Hall Terminal
+								"1756", // ==
+								"1103", // !=
+								"1757", // ==
+								"1121", // Waterfront Terminal
+						})) //
+				.compileBothTripSort());
+		map2.put(4L, new RouteTripSpec(4L, //
+				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), //
+				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) //
+				.addTripSort(MDirectionType.EAST.intValue(), //
+						Arrays.asList(new String[] { //
+						"1615", // 25th Side Rd. & Rosslyn
+								"1521", // Arthur & Valhalla Inn
+								"1043", // Frederica & Brown
+								"1019", // City Hall Terminal
+						})) //
+				.addTripSort(MDirectionType.WEST.intValue(), //
+						Arrays.asList(new String[] { //
+						"1019", // City Hall Terminal
+								"1043", // Frederica & Brown
+								"1608", // ==
+								"1609", // !=
+								"1610", // ==
+								"1615", // 25th Side Rd. & Rosslyn
+						})) //
+				.compileBothTripSort());
+		map2.put(5L, new RouteTripSpec(5L, //
+				0, MTrip.HEADSIGN_TYPE_STRING, COLLEGE, //
+				1, MTrip.HEADSIGN_TYPE_STRING, WESTFORT) //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"1269", // Brown & Frederica
+								"1231", // Confederation College
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"1231", // Confederation College
+								"1269", // Brown & Frederica
+						})) //
+				.compileBothTripSort());
+		map2.put(6L, new RouteTripSpec(6L, //
+				0, MTrip.HEADSIGN_TYPE_STRING, "Frederica & Brown", //
+				1, MTrip.HEADSIGN_TYPE_STRING, "Anemki") //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"1590", // Anemki & FWFN Office
+								"1595", // ++
+								"1043", // Frederica & Brown
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"1043", // Frederica & Brown
+								"1582", // ++
+								"1590", // Anemki & FWFN Office
+						})) //
+				.compileBothTripSort());
+		map2.put(7L, new RouteTripSpec(7L, //
+				0, MTrip.HEADSIGN_TYPE_STRING, SHUNIAH, //
+				1, MTrip.HEADSIGN_TYPE_STRING, WATERFRONT) //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"1121", // Waterfront Terminal
+								"1319", // ==
+								"1320", // !=
+								"1321", // ==
+								"1337", // Shuniah & Erie
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"1337", // Shuniah & Erie
+								"1345", // ++
+								"1121", // Waterfront Terminal
+						})) //
+				.compileBothTripSort());
+		map2.put(8L, new RouteTripSpec(8L, //
+				0, MTrip.HEADSIGN_TYPE_STRING, INTERCITY, // COLLEGE_S_
+				1, MTrip.HEADSIGN_TYPE_STRING, CITY_HALL) //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"1019", // City Hall Terminal
+								"1231", // Confederation College
+								"1006", // Intercity Shopping Centre
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"1006", // Intercity Shopping Centre
+								"1231", // Confederation College
+								"1019", // City Hall Terminal
+						})) //
+				.compileBothTripSort());
+		map2.put(9L, new RouteTripSpec(9L, //
+				0, MTrip.HEADSIGN_TYPE_STRING, INTERCITY, //
+				1, MTrip.HEADSIGN_TYPE_STRING, WATERFRONT) //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"1121", // Waterfront Terminal
+								"1467", // == River & Balsam
+								"1853", // ??? Junot & John ???
+								"1468", // == River & High
+								"1476", // == Junot & Windsor
+								"1853", // Junot & John
+								"1477", // == Golf Links & John
+								"1222", // Lakehead University
+								"1006", // Intercity Shopping Centre
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"1006", // Intercity Shopping Centre
+								"1222", // Lakehead University
+								"1121", // Waterfront Terminal
+						})) //
+				.compileBothTripSort());
+		map2.put(10L, new RouteTripSpec(10L, //
+				0, MTrip.HEADSIGN_TYPE_STRING, COLLEGE, //
+				1, MTrip.HEADSIGN_TYPE_STRING, CITY_HALL) //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"1019", // City Hall Terminal
+								"1255", // ==
+								"1848", // <>
+								"1849", // <>
+								"1256", // ==
+								"1231", // Confederation College
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"1231", // Confederation College
+								"1244", // ==
+								"1848", // <>
+								"1849", // <>
+								"1245", // ==
+								"1019", // City Hall Terminal
+						})) //
+				.compileBothTripSort());
+		map2.put(11L, new RouteTripSpec(11L, //
+				0, MTrip.HEADSIGN_TYPE_STRING, WINDSOR, //
+				1, MTrip.HEADSIGN_TYPE_STRING, WATERFRONT) //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"1121", // Waterfront Terminal
+								"1450", // Windsor & Junot
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"1450", // Windsor & Junot
+								"1121", // Waterfront Terminal
+						})) //
+				.compileBothTripSort());
+		map2.put(12L, new RouteTripSpec(12L, //
+				0, MTrip.HEADSIGN_TYPE_STRING, INTERCITY, //
+				1, MTrip.HEADSIGN_TYPE_STRING, CITY_HALL) //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"1019", // City Hall Terminal
+								"1548", // ++
+								"1006", // Intercity Shopping Centre
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"1006", // Intercity Shopping Centre
+								"1850", // ++
+								"1019", // City Hall Terminal
+						})) //
+				.compileBothTripSort());
+		map2.put(13L, new RouteTripSpec(13L, //
+				0, MTrip.HEADSIGN_TYPE_STRING, COUNTY_FAIR, //
+				1, MTrip.HEADSIGN_TYPE_STRING, WATERFRONT) //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"1121", // Waterfront Terminal
+								"1445", // ++
+								"1423", // Dawson & Regina
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"1423", // Dawson & Regina
+								"1306", // Algoma & John
+								"1121", // Waterfront Terminal
+						})) //
+				.compileBothTripSort());
+		map2.put(14L, new RouteTripSpec(14L, //
+				0, MTrip.HEADSIGN_TYPE_STRING, AIRPORT, //
+				1, MTrip.HEADSIGN_TYPE_STRING, CITY_HALL) //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"1019", // City Hall Terminal
+								"1513", // ==
+								"1514", // !=
+								"1521", // !=
+								"1522", // == Thunder Bay Airport
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"1522", // Thunder Bay Airport
+								"1531", // ++
+								"1019", // City Hall Terminal
+						})) //
+				.compileBothTripSort());
+		map2.put(16L, new RouteTripSpec(16L, //
+				0, MTrip.HEADSIGN_TYPE_STRING, COLLEGE, //
+				1, MTrip.HEADSIGN_TYPE_STRING, CITY_HALL) //
+				.addTripSort(0, //
+						Arrays.asList(new String[] { //
+						"1019", // City Hall Terminal
+								"1839", // ++
+								"1231", // Confederation College
+						})) //
+				.addTripSort(1, //
+						Arrays.asList(new String[] { //
+						"1231", // Confederation College
+								"1573", // ++
+								"1019", // City Hall Terminal
+
+						})) //
+				.compileBothTripSort());
+	}
+
+	@Override
+	public int compareEarly(long routeId, List<MTripStop> list1, List<MTripStop> list2, MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop) {
+		if (ALL_ROUTE_TRIPS2.containsKey(routeId)) {
+			return ALL_ROUTE_TRIPS2.get(routeId).compare(routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop);
+		}
+		return super.compareEarly(routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop);
+	}
+
+	@Override
+	public ArrayList<MTrip> splitTrip(MRoute mRoute, GTrip gTrip, GSpec gtfs) {
+		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
+			return ALL_ROUTE_TRIPS2.get(mRoute.getId()).getAllTrips();
+		}
+		return super.splitTrip(mRoute, gTrip, gtfs);
+	}
+
+	@Override
+	public Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, ArrayList<MTrip> splitTrips, GSpec routeGTFS) {
+		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
+			return SplitUtils.splitTripStop(mRoute, gTrip, gTripStop, routeGTFS, ALL_ROUTE_TRIPS2.get(mRoute.getId()));
+		}
+		return super.splitTripStop(mRoute, gTrip, gTripStop, splitTrips, routeGTFS);
+	}
 
 	@Override
 	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
-		String stationName = null;
-		int directionId = -1;
-		String routeShortName = mRoute.getShortName();
-		String tripHeadsignLC = gTrip.getTripHeadsign().toLowerCase(Locale.ENGLISH);
-		if (ROUTE_SN_1.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(WESTFORT_LC) || tripHeadsignLC.endsWith(CITY_HALL_LC)) {
-				mTrip.setHeadsignString(WESTFORT, 0); // South
-				return;
-			} else if (tripHeadsignLC.endsWith(CURRENT_RIVER_LC) || tripHeadsignLC.endsWith(WATERFRONT_LC)) {
-				mTrip.setHeadsignString(CURRENT_RIVER, 1); // North
-				return;
-			}
-		} else if (ROUTE_SN_2.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(CITY_HALL_LC) || tripHeadsignLC.endsWith(WESTFORT_LC) || tripHeadsignLC.endsWith(COLLEGE_LC)) {
-				mTrip.setHeadsignString(COLLEGE, 0); // South
-				return;
-			} else if (tripHeadsignLC.endsWith(WATERFRONT_LC)) {
-				mTrip.setHeadsignString(WATERFRONT, 1); // North
-				return;
-			}
-		} else if (ROUTE_SN_2W.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(COLLEGE_LC) || tripHeadsignLC.endsWith(WATERFRONT_LC)) {
-				directionId = 0;
-				stationName = WATERFRONT_COLLEGE; // North
-			} else if (tripHeadsignLC.endsWith(WESTFORT_LC)) {
-				directionId = 1;
-				stationName = WESTFORT; // South
-			}
-		} else if (ROUTE_SN_2S.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(COLLEGE_LC)) {
-				directionId = 0;
-				stationName = COLLEGE; // North
-			} else if (tripHeadsignLC.endsWith(WESTFORT_LC)) {
-				directionId = 1;
-				stationName = WESTFORT; // South
-			}
-		} else if (ROUTE_SN_3A.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(AIRPORT_LC)) {
-				directionId = 0;
-				stationName = AIRPORT; // West
-			} else if (tripHeadsignLC.endsWith(CITY_HALL_LC) || tripHeadsignLC.endsWith(JUMBO_GARDENS_LC) || tripHeadsignLC.endsWith(WATERFRONT_LC)) {
-				directionId = 1;
-				stationName = CITY_HALL; // East
-			}
-		} else if (ROUTE_SN_3C.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(CASTLEGREEN_LC) || tripHeadsignLC.endsWith(CASTLEGREEN_DR_LC) || tripHeadsignLC.endsWith(COUNTY_PARK_LC)) {
-				directionId = 0;
-				stationName = CASTLEGREEN; // North / West
-			} else if (tripHeadsignLC.endsWith(WATERFRONT_LC) || tripHeadsignLC.endsWith(CITY_HALL_LC) || tripHeadsignLC.endsWith(NORTHWOOD_LC)) {
-				directionId = 1;
-				stationName = WATERFRONT; // South / East
-			}
-		} else if (ROUTE_SN_3J.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(WATERFRONT_LC) || tripHeadsignLC.endsWith(AIRPORT_LC)) {
-				directionId = 0;
-				stationName = WATERFRONT; // South / East
-			} else if (tripHeadsignLC.endsWith(SHERWOOD_LC) || tripHeadsignLC.endsWith(SHERWOOD_DR_LC) || tripHeadsignLC.endsWith(JUMBO_GARDENS)) {
-				directionId = 1;
-				stationName = SHERWOOD; // North / West
-			}
-		} else if (ROUTE_SN_3M.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(CITY_HALL_LC) || tripHeadsignLC.endsWith(AIRPORT_LC) || tripHeadsignLC.endsWith(NORTHWOOD_LC)) {
-				directionId = 0;
-				stationName = CITY_HALL; // South
-			} else if (tripHeadsignLC.endsWith(WATERFRONT_LC) || tripHeadsignLC.endsWith(COUNTY_PARK_LC) || tripHeadsignLC.endsWith(JUMBO_GARDENS_LC)) {
-				directionId = 1;
-				stationName = WATERFRONT; // North
-			}
-		} else if (ROUTE_SN_3N.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(COUNTY_PARK_LC) || tripHeadsignLC.endsWith(WATERFRONT_LC) || tripHeadsignLC.endsWith(CITY_HALL_LC)) {
-				directionId = 0;
-				stationName = CITY_HALL; // South / East
-			} else if (tripHeadsignLC.endsWith(NORTHWOOD_LC)) {
-				directionId = 1;
-				stationName = COLLEGE; // North / West
-			}
-		} else if (ROUTE_SN_4.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(NEEBING_LC)) {
-				directionId = 0;
-				stationName = NEEBING; // Circle
-			}
-		} else if (ROUTE_SN_5.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(COLLEGE_LC) || tripHeadsignLC.endsWith(WATERFRONT_LC)) {
-				directionId = 0;
-				stationName = COLLEGE; // North
-			} else if (tripHeadsignLC.endsWith(WESTFORT_LC)) {
-				directionId = 1;
-				stationName = WESTFORT; // South
-			}
-		} else if (ROUTE_SN_6.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(MISSION_LC) || tripHeadsignLC.endsWith(MISSION_RD_LC)) {
-				directionId = 0;
-				stationName = MISSION; // Loop
-			}
-		} else if (ROUTE_SN_7.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(SHUNIAH_LC) || tripHeadsignLC.endsWith(SHUNIAH_ST_LC)) {
-				directionId = 0;
-				stationName = SHUNIAH; // North
-			} else if (tripHeadsignLC.endsWith(WATERFRONT_LC)) {
-				directionId = 1;
-				stationName = WATERFRONT; // South
-			}
-		} else if (ROUTE_SN_8.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(INTERCITY_LC) || tripHeadsignLC.endsWith(COLLEGE_LC)) {
-				directionId = 0;
-				stationName = COLLEGE_S_INTERCITY; // North
-			} else if (tripHeadsignLC.endsWith(CITY_HALL_LC)) {
-				directionId = 1;
-				stationName = CITY_HALL; // South
-			}
-		} else if (ROUTE_SN_9.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(INTERCITY_LC) || tripHeadsignLC.endsWith(UNIVERSITY_LC)) {
-				directionId = 0;
-				stationName = UNIVERSITY_S_INTERCITY; // South
-			} else if (tripHeadsignLC.endsWith(WATERFRONT_LC)) {
-				directionId = 1;
-				stationName = WATERFRONT; // North
-			}
-		} else if (ROUTE_SN_10.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(COLLEGE_LC)) {
-				directionId = 0;
-				stationName = COLLEGE; // North
-			} else if (tripHeadsignLC.endsWith(CITY_HALL_LC) || tripHeadsignLC.endsWith(COUNTY_PARK_LC) || tripHeadsignLC.endsWith(WATERFRONT_LC)) {
-				directionId = 1;
-				stationName = CITY_HALL; // South
-			}
-		} else if (ROUTE_SN_11.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(WINDSOR_LC) || tripHeadsignLC.endsWith(WINDSOR_ST_LC)) {
-				directionId = 0;
-				stationName = WINDSOR; // West
-			} else if (tripHeadsignLC.endsWith(WATERFRONT_LC)) {
-				directionId = 1;
-				stationName = WATERFRONT; // East
-			}
-		} else if (ROUTE_SN_12.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(EAST_END_LC)) {
-				directionId = 0;
-				stationName = EAST_END; // Circle
-			}
-		} else if (ROUTE_SN_13.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(COUNTY_FAIR_LC)) {
-				directionId = 0;
-				stationName = COUNTY_FAIR; // North / West
-			} else if (tripHeadsignLC.endsWith(WATERFRONT_LC)) {
-				directionId = 1;
-				stationName = WATERFRONT; // South / East
-			}
-		} else if (ROUTE_SN_14.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(AIRPORT_LC)) {
-				directionId = 0;
-				stationName = AIRPORT; // West
-			} else if (tripHeadsignLC.endsWith(CITY_HALL_LC) || tripHeadsignLC.endsWith(JUMBO_GARDENS_LC) || tripHeadsignLC.endsWith(WATERFRONT_LC)) {
-				directionId = 1;
-				stationName = CITY_HALL; // East
-			}
-		} else if (ROUTE_SN_16.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(COLLEGE_LC)) {
-				directionId = 0;
-				stationName = COLLEGE; // North
-			} else if (tripHeadsignLC.endsWith(CITY_HALL_LC) || tripHeadsignLC.endsWith(WATERFRONT_LC)) {
-				directionId = 1;
-				stationName = CITY_HALL; // South
-			}
-		} else if (ROUTE_SN_20.equals(routeShortName)) {
-			if (tripHeadsignLC.endsWith(EXPRESS_LC)) {
-				directionId = 0;
-				stationName = EXPRESS; // Circle
-			}
+		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
+			return; // split
 		}
-		if (stationName == null || directionId < 0) {
-			System.out.printf("\nUnexpected trip %s!\n", gTrip);
-			System.exit(-1);
-			return;
-		}
-		mTrip.setHeadsignString(stationName, directionId);
+		mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), gTrip.getDirectionId());
 	}
 
 	@Override
@@ -421,7 +527,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	public int getStopId(GStop gStop) {
 		String stopId = gStop.getStopId();
 		if (stopId != null && stopId.length() > 0 && Utils.isDigitsOnly(stopId)) {
-			return Integer.valueOf(stopId); // using stop code as stop ID
+			return Integer.valueOf(stopId);
 		}
 		System.out.printf("\nStop doesn't have an ID (start with) %s!\n", gStop);
 		System.exit(-1);
