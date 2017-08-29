@@ -54,6 +54,11 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	}
 
 	@Override
+	public boolean excludeRoute(GRoute gRoute) {
+		return super.excludeRoute(gRoute);
+	}
+
+	@Override
 	public boolean excludeCalendar(GCalendar gCalendar) {
 		if (this.serviceIds != null) {
 			return excludeUselessCalendar(gCalendar, this.serviceIds);
@@ -69,8 +74,13 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 		return super.excludeCalendarDate(gCalendarDates);
 	}
 
+	private static final String OFF_ONLY = "OFF ONLY";
+
 	@Override
 	public boolean excludeTrip(GTrip gTrip) {
+		if (OFF_ONLY.equalsIgnoreCase(gTrip.getTripHeadsign())) {
+			return true; // exclude
+		}
 		if (this.serviceIds != null) {
 			return excludeUselessTrip(gTrip, this.serviceIds);
 		}
@@ -138,7 +148,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public String getRouteColor(GRoute gRoute) {
-		if (ROUTE_SN_2S.equals(gRoute.getRouteShortName()) && COLOR_000000.equals(gRoute.getRouteColor())) {
+		if ("2S".equals(gRoute.getRouteShortName()) && COLOR_000000.equals(gRoute.getRouteColor())) {
 			return COLOR_13B5EA;
 		}
 		return super.getRouteColor(gRoute);
@@ -163,6 +173,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	private static final String WATERFRONT = "Waterfront";
 	private static final String COUNTY_FAIR = "County Fair";
 	private static final String CASTLEGREEN = "Castlegreen";
+
 	private static HashMap<Long, RouteTripSpec> ALL_ROUTE_TRIPS2;
 	static {
 		HashMap<Long, RouteTripSpec> map2 = new HashMap<Long, RouteTripSpec>();
@@ -266,14 +277,25 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 				.addTripSort(MDirectionType.EAST.intValue(), //
 						Arrays.asList(new String[] { //
 						"1615", // 25th Side Rd. & Rosslyn
+								"1520", // ++
 								"1521", // Arthur & Valhalla Inn
-								"1043", // Frederica & Brown
+								"1524", // ++
+								"1066", // !=
+								"1043", // <> Frederica & Brown
+								"1067", // !=
+								"1827", // ++
 								"1019", // City Hall Terminal
 						})) //
 				.addTripSort(MDirectionType.WEST.intValue(), //
 						Arrays.asList(new String[] { //
 						"1019", // City Hall Terminal
-								"1043", // Frederica & Brown
+								"1842", // ==
+								"1026", // !=
+								"1029", // !=
+								"1030", // ==
+								"1042", // !=
+								"1043", // <> Frederica & Brown
+								"1044", // !-
 								"1608", // ==
 								"1609", // !=
 								"1610", // ==
@@ -353,6 +375,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 								"1467", // == River & Balsam
 								"1853", // ??? Junot & John ???
 								"1468", // == River & High
+								//
 								"1476", // == Junot & Windsor
 								"1853", // Junot & John
 								"1477", // == Golf Links & John
