@@ -9,6 +9,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.Pair;
 import org.mtransit.parser.SplitUtils;
@@ -139,6 +140,39 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 
 	@Override
 	public String getRouteLongName(GRoute gRoute) {
+		if (StringUtils.isEmpty(gRoute.getRouteLongName())) {
+			if (Utils.isDigitsOnly(gRoute.getRouteShortName())) {
+				int rsn = Integer.parseInt(gRoute.getRouteShortName());
+				switch (rsn) {
+				// @formatter:off
+				case 1: return "Mainline";
+				case 2: return "Crosstown";
+				case 4: return "Neebing";
+				case 5: return "Edward";
+				case 6: return "Mission Rd.";
+				case 7: return "Hudson";
+				case 8: return "James";
+				case 9: return "Junot";
+				case 10: return "Northwood";
+				case 11: return "John";
+				case 12: return "East End";
+				case 13: return "John-Jumbo";
+				case 14: return "Arthur";
+				case 16: return "Balmoral";
+				// @formatter:on
+				}
+			}
+			if ("3C".equalsIgnoreCase(gRoute.getRouteShortName())) {
+				return "County Park";
+			} else if ("3J".equalsIgnoreCase(gRoute.getRouteShortName())) {
+				return "Jumbo Gardens";
+			} else if ("3M".equalsIgnoreCase(gRoute.getRouteShortName())) {
+				return "Memorial";
+			}
+			System.out.printf("\nUnexpected route long name '%s'\n!", gRoute);
+			System.exit(-1);
+			return null;
+		}
 		return cleanRouteLongName(gRoute);
 	}
 
@@ -148,13 +182,11 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 		return CleanUtils.cleanLabel(routeLongName);
 	}
 
-	private static final String COLOR_000000 = "000000";
-	private static final String COLOR_13B5EA = "13B5EA";
-
 	@Override
 	public String getRouteColor(GRoute gRoute) {
-		if ("2S".equals(gRoute.getRouteShortName()) && COLOR_000000.equals(gRoute.getRouteColor())) {
-			return COLOR_13B5EA;
+		if ("2S".equals(gRoute.getRouteShortName()) //
+				&& "000000".equals(gRoute.getRouteColor())) {
+			return "13B5EA";
 		}
 		return super.getRouteColor(gRoute);
 	}
@@ -497,6 +529,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 
 						})) //
 				.compileBothTripSort());
+		ALL_ROUTE_TRIPS2 = map2;
 	}
 
 	@Override
