@@ -241,11 +241,20 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 						Arrays.asList(new String[] { //
 						"1121", // Waterfront Terminal
 								"1207", // John & Machar
+								"1210", // High & Queen
+								"1221", // !=
+								"1222", // <> Lakehead University
+								"1223", // <>
+								"1224", // !=
 								"1231", // Confederation College
 						})) //
 				.addTripSort(1, //
 						Arrays.asList(new String[] { //
 						"1231", // Confederation College
+								"1293", // !=
+								"1222", // <> Lakehead University
+								"1223", // <>
+								"1294", // !=
 								"1115", // Court & John
 								"1121", // Waterfront Terminal
 						})) //
