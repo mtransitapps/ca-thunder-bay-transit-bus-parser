@@ -256,6 +256,23 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 								"1590" // Anemki & FWFN Office
 						)) //
 				.compileBothTripSort());
+		map2.put(8L, new RouteTripSpec(8L, //
+				0, MTrip.HEADSIGN_TYPE_STRING, "Intercity", //
+				1, MTrip.HEADSIGN_TYPE_STRING, "City Hall") //
+				.addTripSort(0, //
+						Arrays.asList(//
+								"1019", // City Hall Terminal
+								"1231", // Confederation College
+								"1006" // Intercity Shopping Centre
+						)) //
+				.addTripSort(1, //
+						Arrays.asList(//
+								"1006", // Intercity Shopping Centre
+								"1231", // Confederation College
+								"1019" // City Hall Terminal
+
+						)) //
+				.compileBothTripSort());
 		map2.put(12L, new RouteTripSpec(12L, //
 				0, MTrip.HEADSIGN_TYPE_STRING, "Intercity", //
 				1, MTrip.HEADSIGN_TYPE_STRING, "City Hall") //
