@@ -1,12 +1,14 @@
 package org.mtransit.parser.ca_thunder_bay_transit_bus;
 
-import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.mtransit.parser.CleanUtils;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Pair;
 import org.mtransit.parser.SplitUtils;
 import org.mtransit.parser.SplitUtils.RouteTripSpec;
+import org.mtransit.parser.StringUtils;
 import org.mtransit.parser.Utils;
 import org.mtransit.parser.gtfs.data.GCalendar;
 import org.mtransit.parser.gtfs.data.GCalendarDate;
@@ -34,7 +36,7 @@ import java.util.regex.Pattern;
 // http://api.nextlift.ca/gtfs.zip
 public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 
-	public static void main(String[] args) {
+	public static void main(@Nullable String[] args) {
 		if (args == null || args.length == 0) {
 			args = new String[3];
 			args[0] = "input/gtfs.zip";
@@ -44,39 +46,35 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 		new ThunderBayTransitBusAgencyTools().start(args);
 	}
 
-	private HashSet<String> serviceIds;
+	@Nullable
+	private HashSet<Integer> serviceIdInts;
 
 	@Override
-	public void start(String[] args) {
+	public void start(@NotNull String[] args) {
 		MTLog.log("Generating Thunder Bay Transit bus data...");
 		long start = System.currentTimeMillis();
-		this.serviceIds = extractUsefulServiceIds(args, this, true);
+		this.serviceIdInts = extractUsefulServiceIdInts(args, this, true);
 		super.start(args);
 		MTLog.log("Generating Thunder Bay Transit bus data... DONE in %s.", Utils.getPrettyDuration(System.currentTimeMillis() - start));
 	}
 
 	@Override
 	public boolean excludingAll() {
-		return this.serviceIds != null && this.serviceIds.isEmpty();
+		return this.serviceIdInts != null && this.serviceIdInts.isEmpty();
 	}
 
 	@Override
-	public boolean excludeRoute(GRoute gRoute) {
-		return super.excludeRoute(gRoute);
-	}
-
-	@Override
-	public boolean excludeCalendar(GCalendar gCalendar) {
-		if (this.serviceIds != null) {
-			return excludeUselessCalendar(gCalendar, this.serviceIds);
+	public boolean excludeCalendar(@NotNull GCalendar gCalendar) {
+		if (this.serviceIdInts != null) {
+			return excludeUselessCalendarInt(gCalendar, this.serviceIdInts);
 		}
 		return super.excludeCalendar(gCalendar);
 	}
 
 	@Override
-	public boolean excludeCalendarDate(GCalendarDate gCalendarDates) {
-		if (this.serviceIds != null) {
-			return excludeUselessCalendarDate(gCalendarDates, this.serviceIds);
+	public boolean excludeCalendarDate(@NotNull GCalendarDate gCalendarDates) {
+		if (this.serviceIdInts != null) {
+			return excludeUselessCalendarDateInt(gCalendarDates, this.serviceIdInts);
 		}
 		return super.excludeCalendarDate(gCalendarDates);
 	}
@@ -84,16 +82,17 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	private static final String OFF_ONLY = "OFF ONLY";
 
 	@Override
-	public boolean excludeTrip(GTrip gTrip) {
+	public boolean excludeTrip(@NotNull GTrip gTrip) {
 		if (OFF_ONLY.equalsIgnoreCase(gTrip.getTripHeadsign())) {
 			return true; // exclude
 		}
-		if (this.serviceIds != null) {
-			return excludeUselessTrip(gTrip, this.serviceIds);
+		if (this.serviceIdInts != null) {
+			return excludeUselessTripInt(gTrip, this.serviceIdInts);
 		}
 		return super.excludeTrip(gTrip);
 	}
 
+	@NotNull
 	@Override
 	public Integer getAgencyRouteType() {
 		return MAgency.ROUTE_TYPE_BUS;
@@ -118,8 +117,9 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	private static final long RID_ENDS_WITH_W = 23_000L;
 
 	@Override
-	public long getRouteId(GRoute gRoute) {
-		String routeId = gRoute.getRouteId();
+	public long getRouteId(@NotNull GRoute gRoute) {
+		//noinspection deprecation
+		final String routeId = gRoute.getRouteId();
 		if (routeId.length() > 0 && Utils.isDigitsOnly(routeId)) {
 			return Long.parseLong(routeId);
 		}
@@ -142,12 +142,12 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 				return digits + RID_ENDS_WITH_W;
 			}
 		}
-		MTLog.logFatal("Can't find route ID for %s!", gRoute);
-		return -1L;
+		throw new MTLog.Fatal("Can't find route ID for %s!", gRoute);
 	}
 
+	@NotNull
 	@Override
-	public String getRouteLongName(GRoute gRoute) {
+	public String getRouteLongName(@NotNull GRoute gRoute) {
 		if (StringUtils.isEmpty(gRoute.getRouteLongName())) {
 			if (Utils.isDigitsOnly(gRoute.getRouteShortName())) {
 				int rsn = Integer.parseInt(gRoute.getRouteShortName());
@@ -177,8 +177,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 			} else if ("3M".equalsIgnoreCase(gRoute.getRouteShortName())) {
 				return "Memorial";
 			}
-			MTLog.logFatal("Unexpected route long name '%s'\n!", gRoute);
-			return null;
+			throw new MTLog.Fatal("Unexpected route long name '%s'\n!", gRoute);
 		}
 		return cleanRouteLongName(gRoute);
 	}
@@ -189,8 +188,9 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 		return CleanUtils.cleanLabel(routeLongName);
 	}
 
+	@Nullable
 	@Override
-	public String getRouteColor(GRoute gRoute) {
+	public String getRouteColor(@NotNull GRoute gRoute) {
 		if ("2S".equals(gRoute.getRouteShortName()) //
 				&& "000000".equals(gRoute.getRouteColor())) {
 			return "13B5EA";
@@ -200,15 +200,17 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 
 	private static final String AGENCY_COLOR = "1FB25A";
 
+	@NotNull
 	@Override
 	public String getAgencyColor() {
 		return AGENCY_COLOR;
 	}
 
-	private static HashMap<Long, RouteTripSpec> ALL_ROUTE_TRIPS2;
+	private static final HashMap<Long, RouteTripSpec> ALL_ROUTE_TRIPS2;
 
 	static {
 		HashMap<Long, RouteTripSpec> map2 = new HashMap<>();
+		//noinspection deprecation
 		map2.put(4L, new RouteTripSpec(4L, //
 				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), //
 				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) //
@@ -240,6 +242,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 								"1615" // 25th Side Rd. & Rosslyn
 						)) //
 				.compileBothTripSort());
+		//noinspection deprecation
 		map2.put(6L, new RouteTripSpec(6L, //
 				0, MTrip.HEADSIGN_TYPE_STRING, "Frederica & Brown", //
 				1, MTrip.HEADSIGN_TYPE_STRING, "Anemki") //
@@ -256,6 +259,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 								"1590" // Anemki & FWFN Office
 						)) //
 				.compileBothTripSort());
+		//noinspection deprecation
 		map2.put(8L, new RouteTripSpec(8L, //
 				0, MTrip.HEADSIGN_TYPE_STRING, "Intercity", //
 				1, MTrip.HEADSIGN_TYPE_STRING, "City Hall") //
@@ -273,6 +277,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 
 						)) //
 				.compileBothTripSort());
+		//noinspection deprecation
 		map2.put(12L, new RouteTripSpec(12L, //
 				0, MTrip.HEADSIGN_TYPE_STRING, "Intercity", //
 				1, MTrip.HEADSIGN_TYPE_STRING, "City Hall") //
@@ -293,23 +298,25 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	}
 
 	@Override
-	public int compareEarly(long routeId, List<MTripStop> list1, List<MTripStop> list2, MTripStop ts1, MTripStop ts2, GStop ts1GStop, GStop ts2GStop) {
+	public int compareEarly(long routeId, @NotNull List<MTripStop> list1, @NotNull List<MTripStop> list2, @NotNull MTripStop ts1, @NotNull MTripStop ts2, @NotNull GStop ts1GStop, @NotNull GStop ts2GStop) {
 		if (ALL_ROUTE_TRIPS2.containsKey(routeId)) {
 			return ALL_ROUTE_TRIPS2.get(routeId).compare(routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop, this);
 		}
 		return super.compareEarly(routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop);
 	}
 
+	@NotNull
 	@Override
-	public ArrayList<MTrip> splitTrip(MRoute mRoute, GTrip gTrip, GSpec gtfs) {
+	public ArrayList<MTrip> splitTrip(@NotNull MRoute mRoute, @Nullable GTrip gTrip, @NotNull GSpec gtfs) {
 		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
 			return ALL_ROUTE_TRIPS2.get(mRoute.getId()).getAllTrips();
 		}
 		return super.splitTrip(mRoute, gTrip, gtfs);
 	}
 
+	@NotNull
 	@Override
-	public Pair<Long[], Integer[]> splitTripStop(MRoute mRoute, GTrip gTrip, GTripStop gTripStop, ArrayList<MTrip> splitTrips, GSpec routeGTFS) {
+	public Pair<Long[], Integer[]> splitTripStop(@NotNull MRoute mRoute, @NotNull GTrip gTrip, @NotNull GTripStop gTripStop, @NotNull ArrayList<MTrip> splitTrips, @NotNull GSpec routeGTFS) {
 		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
 			return SplitUtils.splitTripStop(mRoute, gTrip, gTripStop, routeGTFS, ALL_ROUTE_TRIPS2.get(mRoute.getId()), this);
 		}
@@ -317,7 +324,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	}
 
 	@Override
-	public void setTripHeadsign(MRoute mRoute, MTrip mTrip, GTrip gTrip, GSpec gtfs) {
+	public void setTripHeadsign(@NotNull MRoute mRoute, @NotNull MTrip mTrip, @NotNull GTrip gTrip, @NotNull GSpec gtfs) {
 		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
 			return; // split
 		}
@@ -482,14 +489,16 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 					return;
 				}
 			}
-			MTLog.logFatal("%d, Unexpected trips %s!", mRoute.getId(), gTrip);
-			return;
+			throw new MTLog.Fatal("%d, Unexpected trips %s!", mRoute.getId(), gTrip);
 		}
-		mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), gTrip.getDirectionId());
+		mTrip.setHeadsignString(
+				cleanTripHeadsign(gTrip.getTripHeadsignOrDefault()),
+				gTrip.getDirectionIdOrDefault()
+		);
 	}
 
 	@Override
-	public boolean mergeHeadsign(MTrip mTrip, MTrip mTripToMerge) {
+	public boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge) {
 		List<String> headsignsValues = Arrays.asList(mTrip.getHeadsignValue(), mTripToMerge.getHeadsignValue());
 		if (mTrip.getRouteId() == 1L) {
 			if (Arrays.asList( //
@@ -617,12 +626,12 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 				return true;
 			}
 		}
-		MTLog.logFatal("Unexpected trips to merge %s & %s", mTrip, mTripToMerge);
-		return false;
+		throw new MTLog.Fatal("Unexpected trips to merge %s & %s", mTrip, mTripToMerge);
 	}
 
+	@NotNull
 	@Override
-	public String cleanTripHeadsign(String tripHeadsign) {
+	public String cleanTripHeadsign(@NotNull String tripHeadsign) {
 		tripHeadsign = CleanUtils.keepToAndRemoveVia(tripHeadsign);
 		if (Utils.isUppercaseOnly(tripHeadsign, true, true)) {
 			tripHeadsign = tripHeadsign.toLowerCase(Locale.ENGLISH);
@@ -633,25 +642,28 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 		return CleanUtils.cleanLabel(tripHeadsign);
 	}
 
+	@NotNull
 	@Override
-	public String cleanStopName(String gStopName) {
+	public String cleanStopName(@NotNull String gStopName) {
 		gStopName = CleanUtils.cleanStreetTypes(gStopName);
 		gStopName = CleanUtils.cleanNumbers(gStopName);
 		return CleanUtils.cleanLabel(gStopName);
 	}
 
+	@NotNull
 	@Override
-	public String getStopCode(GStop gStop) {
+	public String getStopCode(@NotNull GStop gStop) {
+		//noinspection deprecation
 		return gStop.getStopId(); // using stop ID as stop code
 	}
 
 	@Override
-	public int getStopId(GStop gStop) {
-		String stopId = gStop.getStopId();
+	public int getStopId(@NotNull GStop gStop) {
+		//noinspection deprecation
+		final String stopId = gStop.getStopId();
 		if (stopId != null && stopId.length() > 0 && Utils.isDigitsOnly(stopId)) {
-			return Integer.valueOf(stopId);
+			return Integer.parseInt(stopId);
 		}
-		MTLog.logFatal("Stop doesn't have an ID (start with) %s!", gStop);
-		return -1;
+		throw new MTLog.Fatal("Stop doesn't have an ID (start with) %s!", gStop);
 	}
 }
