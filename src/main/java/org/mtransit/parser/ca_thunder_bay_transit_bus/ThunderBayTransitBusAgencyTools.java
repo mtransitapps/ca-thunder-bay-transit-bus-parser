@@ -2,16 +2,14 @@ package org.mtransit.parser.ca_thunder_bay_transit_bus;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.mtransit.parser.CleanUtils;
+import org.mtransit.commons.CharUtils;
+import org.mtransit.commons.CleanUtils;
+import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.MTLog;
 import org.mtransit.parser.Pair;
 import org.mtransit.parser.SplitUtils;
 import org.mtransit.parser.SplitUtils.RouteTripSpec;
-import org.mtransit.parser.StringUtils;
-import org.mtransit.parser.Utils;
-import org.mtransit.parser.gtfs.data.GCalendar;
-import org.mtransit.parser.gtfs.data.GCalendarDate;
 import org.mtransit.parser.gtfs.data.GRoute;
 import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
@@ -26,7 +24,6 @@ import org.mtransit.parser.mt.data.MTripStop;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -36,47 +33,19 @@ import java.util.regex.Pattern;
 // http://api.nextlift.ca/gtfs.zip
 public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 
-	public static void main(@Nullable String[] args) {
-		if (args == null || args.length == 0) {
-			args = new String[3];
-			args[0] = "input/gtfs.zip";
-			args[1] = "../../mtransitapps/ca-thunder-bay-transit-bus-android/res/raw/";
-			args[2] = ""; // files-prefix
-		}
+	public static void main(@NotNull String[] args) {
 		new ThunderBayTransitBusAgencyTools().start(args);
 	}
 
-	@Nullable
-	private HashSet<Integer> serviceIdInts;
-
 	@Override
-	public void start(@NotNull String[] args) {
-		MTLog.log("Generating Thunder Bay Transit bus data...");
-		long start = System.currentTimeMillis();
-		this.serviceIdInts = extractUsefulServiceIdInts(args, this, true);
-		super.start(args);
-		MTLog.log("Generating Thunder Bay Transit bus data... DONE in %s.", Utils.getPrettyDuration(System.currentTimeMillis() - start));
+	public boolean defaultExcludeEnabled() {
+		return true;
 	}
 
+	@NotNull
 	@Override
-	public boolean excludingAll() {
-		return this.serviceIdInts != null && this.serviceIdInts.isEmpty();
-	}
-
-	@Override
-	public boolean excludeCalendar(@NotNull GCalendar gCalendar) {
-		if (this.serviceIdInts != null) {
-			return excludeUselessCalendarInt(gCalendar, this.serviceIdInts);
-		}
-		return super.excludeCalendar(gCalendar);
-	}
-
-	@Override
-	public boolean excludeCalendarDate(@NotNull GCalendarDate gCalendarDates) {
-		if (this.serviceIdInts != null) {
-			return excludeUselessCalendarDateInt(gCalendarDates, this.serviceIdInts);
-		}
-		return super.excludeCalendarDate(gCalendarDates);
+	public String getAgencyName() {
+		return "Thunder Bay Transit";
 	}
 
 	private static final String OFF_ONLY = "OFF ONLY";
@@ -85,9 +54,6 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	public boolean excludeTrip(@NotNull GTrip gTrip) {
 		if (OFF_ONLY.equalsIgnoreCase(gTrip.getTripHeadsign())) {
 			return true; // exclude
-		}
-		if (this.serviceIdInts != null) {
-			return excludeUselessTripInt(gTrip, this.serviceIdInts);
 		}
 		return super.excludeTrip(gTrip);
 	}
@@ -120,7 +86,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	public long getRouteId(@NotNull GRoute gRoute) {
 		//noinspection deprecation
 		final String routeId = gRoute.getRouteId();
-		if (routeId.length() > 0 && Utils.isDigitsOnly(routeId)) {
+		if (routeId.length() > 0 && CharUtils.isDigitsOnly(routeId)) {
 			return Long.parseLong(routeId);
 		}
 		Matcher matcher = DIGITS.matcher(routeId);
@@ -149,7 +115,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	@Override
 	public String getRouteLongName(@NotNull GRoute gRoute) {
 		if (StringUtils.isEmpty(gRoute.getRouteLongName())) {
-			if (Utils.isDigitsOnly(gRoute.getRouteShortName())) {
+			if (CharUtils.isDigitsOnly(gRoute.getRouteShortName())) {
 				int rsn = Integer.parseInt(gRoute.getRouteShortName());
 				switch (rsn) {
 				// @formatter:off
@@ -179,13 +145,14 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 			}
 			throw new MTLog.Fatal("Unexpected route long name '%s'\n!", gRoute);
 		}
-		return cleanRouteLongName(gRoute);
+		return super.getRouteLongName(gRoute);
 	}
 
-	private String cleanRouteLongName(GRoute gRoute) {
-		String routeLongName = gRoute.getRouteLongName();
-		routeLongName = routeLongName.toLowerCase(Locale.ENGLISH);
-		return CleanUtils.cleanLabel(routeLongName);
+	@NotNull
+	@Override
+	public String cleanRouteLongName(@NotNull String routeLongName) {
+		routeLongName = CleanUtils.toLowerCaseUpperCaseWords(Locale.ENGLISH, routeLongName);
+		return super.cleanRouteLongName(routeLongName);
 	}
 
 	@Nullable
@@ -329,163 +296,164 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 			return; // split
 		}
 		if (gTrip.getDirectionId() == null) {
+			final String tripHeadsign = gTrip.getTripHeadsignOrDefault();
 			if (mRoute.getId() == 1L) {
-				if (gTrip.getTripHeadsign().endsWith(" to City Hall") //
-						|| gTrip.getTripHeadsign().endsWith(" to Westfort")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 0);
+				if (tripHeadsign.endsWith(" to City Hall") //
+						|| tripHeadsign.endsWith(" to Westfort")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
 					return;
 				}
-				if (gTrip.getTripHeadsign().endsWith(" to Waterfront") //
-						|| gTrip.getTripHeadsign().endsWith(" to Current River")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 1);
+				if (tripHeadsign.endsWith(" to Waterfront") //
+						|| tripHeadsign.endsWith(" to Current River")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
 					return;
 				}
 			}
 			if (mRoute.getId() == 2L) {
-				if (gTrip.getTripHeadsign().endsWith(" to City Hall") //
-						|| gTrip.getTripHeadsign().endsWith(" to University") //
-						|| gTrip.getTripHeadsign().endsWith(" to Westfort")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 0);
+				if (tripHeadsign.endsWith(" to City Hall") //
+						|| tripHeadsign.endsWith(" to University") //
+						|| tripHeadsign.endsWith(" to Westfort")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
 					return;
 				}
-				if (gTrip.getTripHeadsign().endsWith(" to Machar") //
-						|| gTrip.getTripHeadsign().endsWith(" to Waterfront")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 1);
+				if (tripHeadsign.endsWith(" to Machar") //
+						|| tripHeadsign.endsWith(" to Waterfront")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
 					return;
 				}
 			}
 			if (mRoute.getId() == 3L + RID_ENDS_WITH_C) { // 3C
-				if (gTrip.getTripHeadsign().endsWith(" to Castlegreen Dr")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 0);
+				if (tripHeadsign.endsWith(" to Castlegreen Dr")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
 					return;
 				}
-				if (gTrip.getTripHeadsign().endsWith(" to Northwood") //
-						|| gTrip.getTripHeadsign().endsWith(" to City Hall") //
-						|| gTrip.getTripHeadsign().endsWith(" to Waterfront")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 1);
+				if (tripHeadsign.endsWith(" to Northwood") //
+						|| tripHeadsign.endsWith(" to City Hall") //
+						|| tripHeadsign.endsWith(" to Waterfront")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
 					return;
 				}
 			}
 			if (mRoute.getId() == 3L + RID_ENDS_WITH_J) { // 3J
-				if (gTrip.getTripHeadsign().endsWith(" to Sherwood Dr.")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 0);
+				if (tripHeadsign.endsWith(" to Sherwood Dr.")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
 					return;
 				}
-				if (gTrip.getTripHeadsign().endsWith(" to Airport") //
-						|| gTrip.getTripHeadsign().endsWith(" to Waterfront")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 1);
+				if (tripHeadsign.endsWith(" to Airport") //
+						|| tripHeadsign.endsWith(" to Waterfront")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
 					return;
 				}
 			}
 			if (mRoute.getId() == 3L + RID_ENDS_WITH_M) { // 3M
-				if (gTrip.getTripHeadsign().endsWith(" to City Hall") //
-						|| gTrip.getTripHeadsign().endsWith(" to Airport") //
-						|| gTrip.getTripHeadsign().endsWith(" to Northwood")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 0);
+				if (tripHeadsign.endsWith(" to City Hall") //
+						|| tripHeadsign.endsWith(" to Airport") //
+						|| tripHeadsign.endsWith(" to Northwood")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
 					return;
 				}
-				if (gTrip.getTripHeadsign().endsWith(" to Waterfront") //
-						|| gTrip.getTripHeadsign().endsWith(" to County Park") //
-						|| gTrip.getTripHeadsign().endsWith(" to Jumbo Gardens")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 1);
+				if (tripHeadsign.endsWith(" to Waterfront") //
+						|| tripHeadsign.endsWith(" to County Park") //
+						|| tripHeadsign.endsWith(" to Jumbo Gardens")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
 					return;
 				}
 			}
 			if (mRoute.getId() == 5L) {
-				if (gTrip.getTripHeadsign().endsWith(" to Westfort")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 0);
+				if (tripHeadsign.endsWith(" to Westfort")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
 					return;
 				}
-				if (gTrip.getTripHeadsign().endsWith(" to Waterfront") //
-						|| gTrip.getTripHeadsign().endsWith(" to College")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 1);
+				if (tripHeadsign.endsWith(" to Waterfront") //
+						|| tripHeadsign.endsWith(" to College")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
 					return;
 				}
 			}
 			if (mRoute.getId() == 7L) {
-				if (gTrip.getTripHeadsign().endsWith(" to Shuniah St.")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 0);
+				if (tripHeadsign.endsWith(" to Shuniah St.")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
 					return;
 				}
-				if (gTrip.getTripHeadsign().endsWith(" to Waterfront")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 1);
+				if (tripHeadsign.endsWith(" to Waterfront")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
 					return;
 				}
 			}
 			if (mRoute.getId() == 8L) {
-				if (gTrip.getTripHeadsign().endsWith(" to Intercity") //
-						|| gTrip.getTripHeadsign().endsWith(" to College")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 0);
+				if (tripHeadsign.endsWith(" to Intercity") //
+						|| tripHeadsign.endsWith(" to College")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
 					return;
 				}
-				if (gTrip.getTripHeadsign().endsWith(" to City Hall")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 1);
+				if (tripHeadsign.endsWith(" to City Hall")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
 					return;
 				}
 			}
 			if (mRoute.getId() == 9L) {
-				if (gTrip.getTripHeadsign().endsWith(" to Intercity") //
-						|| gTrip.getTripHeadsign().endsWith(" to University")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 0);
+				if (tripHeadsign.endsWith(" to Intercity") //
+						|| tripHeadsign.endsWith(" to University")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
 					return;
 				}
-				if (gTrip.getTripHeadsign().endsWith(" to Waterfront")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 1);
+				if (tripHeadsign.endsWith(" to Waterfront")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
 					return;
 				}
 			}
 			if (mRoute.getId() == 10L) {
-				if (gTrip.getTripHeadsign().endsWith(" to College")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 0);
+				if (tripHeadsign.endsWith(" to College")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
 					return;
 				}
-				if (gTrip.getTripHeadsign().endsWith(" to County Park") //
-						|| gTrip.getTripHeadsign().endsWith(" to City Hall") //
-						|| gTrip.getTripHeadsign().endsWith(" to Waterfront")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 1);
+				if (tripHeadsign.endsWith(" to County Park") //
+						|| tripHeadsign.endsWith(" to City Hall") //
+						|| tripHeadsign.endsWith(" to Waterfront")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
 					return;
 				}
 			}
 			if (mRoute.getId() == 11L) {
-				if (gTrip.getTripHeadsign().endsWith(" to Windsor St.")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 0);
+				if (tripHeadsign.endsWith(" to Windsor St.")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
 					return;
 				}
-				if (gTrip.getTripHeadsign().endsWith(" to Waterfront")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 1);
+				if (tripHeadsign.endsWith(" to Waterfront")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
 					return;
 				}
 			}
 			if (mRoute.getId() == 13L) {
-				if (gTrip.getTripHeadsign().endsWith(" to County Fair")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 0);
+				if (tripHeadsign.endsWith(" to County Fair")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
 					return;
 				}
-				if (gTrip.getTripHeadsign().endsWith(" to Waterfront")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 1);
+				if (tripHeadsign.endsWith(" to Waterfront")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
 					return;
 				}
 			}
 			if (mRoute.getId() == 14L) {
-				if (gTrip.getTripHeadsign().endsWith(" to Airport")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 0);
+				if (tripHeadsign.endsWith(" to Airport")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
 					return;
 				}
-				if (gTrip.getTripHeadsign().endsWith(" to Jumbo Gardens") //
-						|| gTrip.getTripHeadsign().endsWith(" to Waterfront") //
-						|| gTrip.getTripHeadsign().endsWith(" to City Hall")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 1);
+				if (tripHeadsign.endsWith(" to Jumbo Gardens") //
+						|| tripHeadsign.endsWith(" to Waterfront") //
+						|| tripHeadsign.endsWith(" to City Hall")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
 					return;
 				}
 			}
 			if (mRoute.getId() == 16L) {
-				if (gTrip.getTripHeadsign().endsWith(" to College") //
-						|| gTrip.getTripHeadsign().endsWith(" to Waterfront")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 0);
+				if (tripHeadsign.endsWith(" to College") //
+						|| tripHeadsign.endsWith(" to Waterfront")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
 					return;
 				}
-				if (gTrip.getTripHeadsign().endsWith(" to City Hall")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(gTrip.getTripHeadsign()), 1);
+				if (tripHeadsign.endsWith(" to City Hall")) {
+					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
 					return;
 				}
 			}
@@ -665,7 +633,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	public int getStopId(@NotNull GStop gStop) {
 		//noinspection deprecation
 		final String stopId = gStop.getStopId();
-		if (stopId != null && stopId.length() > 0 && Utils.isDigitsOnly(stopId)) {
+		if (stopId.length() > 0 && CharUtils.isDigitsOnly(stopId)) {
 			return Integer.parseInt(stopId);
 		}
 		throw new MTLog.Fatal("Stop doesn't have an ID (start with) %s!", gStop);
