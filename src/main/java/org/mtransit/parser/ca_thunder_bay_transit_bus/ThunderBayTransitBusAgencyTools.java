@@ -7,24 +7,11 @@ import org.mtransit.commons.CleanUtils;
 import org.mtransit.commons.StringUtils;
 import org.mtransit.parser.DefaultAgencyTools;
 import org.mtransit.parser.MTLog;
-import org.mtransit.parser.Pair;
-import org.mtransit.parser.SplitUtils;
-import org.mtransit.parser.SplitUtils.RouteTripSpec;
 import org.mtransit.parser.gtfs.data.GRoute;
-import org.mtransit.parser.gtfs.data.GSpec;
 import org.mtransit.parser.gtfs.data.GStop;
 import org.mtransit.parser.gtfs.data.GTrip;
-import org.mtransit.parser.gtfs.data.GTripStop;
 import org.mtransit.parser.mt.data.MAgency;
-import org.mtransit.parser.mt.data.MDirectionType;
-import org.mtransit.parser.mt.data.MRoute;
-import org.mtransit.parser.mt.data.MTrip;
-import org.mtransit.parser.mt.data.MTripStop;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -89,9 +76,9 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 		if (routeId.length() > 0 && CharUtils.isDigitsOnly(routeId)) {
 			return Long.parseLong(routeId);
 		}
-		Matcher matcher = DIGITS.matcher(routeId);
+		final Matcher matcher = DIGITS.matcher(routeId);
 		if (matcher.find()) {
-			long digits = Long.parseLong(matcher.group());
+			final long digits = Long.parseLong(matcher.group());
 			if (routeId.endsWith(A)) {
 				return digits + RID_ENDS_WITH_A;
 			} else if (routeId.endsWith(C)) {
@@ -116,7 +103,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	public String getRouteLongName(@NotNull GRoute gRoute) {
 		if (StringUtils.isEmpty(gRoute.getRouteLongName())) {
 			if (CharUtils.isDigitsOnly(gRoute.getRouteShortName())) {
-				int rsn = Integer.parseInt(gRoute.getRouteShortName());
+				final int rsn = Integer.parseInt(gRoute.getRouteShortName());
 				switch (rsn) {
 				// @formatter:off
 				case 1: return "Mainline";
@@ -173,433 +160,14 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 		return AGENCY_COLOR;
 	}
 
-	private static final HashMap<Long, RouteTripSpec> ALL_ROUTE_TRIPS2;
-
-	static {
-		HashMap<Long, RouteTripSpec> map2 = new HashMap<>();
-		//noinspection deprecation
-		map2.put(4L, new RouteTripSpec(4L, //
-				MDirectionType.EAST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.EAST.getId(), //
-				MDirectionType.WEST.intValue(), MTrip.HEADSIGN_TYPE_DIRECTION, MDirectionType.WEST.getId()) //
-				.addTripSort(MDirectionType.EAST.intValue(), //
-						Arrays.asList(//
-								"1615", // 25th Side Rd. & Rosslyn
-								"1520", // ++
-								"1521", // Arthur & Valhalla Inn
-								"1524", // ++
-								"1066", // !=
-								"1043", // <> Frederica & Brown
-								"1067", // !=
-								"1827", // ++
-								"1019" // City Hall Terminal
-						)) //
-				.addTripSort(MDirectionType.WEST.intValue(), //
-						Arrays.asList(//
-								"1019", // City Hall Terminal
-								"1842", // ==
-								"1026", // !=
-								"1029", // !=
-								"1030", // ==
-								"1042", // !=
-								"1043", // <> Frederica & Brown
-								"1044", // !-
-								"1608", // ==
-								"1609", // !=
-								"1610", // ==
-								"1615" // 25th Side Rd. & Rosslyn
-						)) //
-				.compileBothTripSort());
-		//noinspection deprecation
-		map2.put(6L, new RouteTripSpec(6L, //
-				0, MTrip.HEADSIGN_TYPE_STRING, "Frederica & Brown", //
-				1, MTrip.HEADSIGN_TYPE_STRING, "Anemki") //
-				.addTripSort(0, //
-						Arrays.asList(//
-								"1590", // Anemki & FWFN Office
-								"1595", // ++
-								"1043" // Frederica & Brown
-						)) //
-				.addTripSort(1, //
-						Arrays.asList(//
-								"1043", // Frederica & Brown
-								"1582", // ++
-								"1590" // Anemki & FWFN Office
-						)) //
-				.compileBothTripSort());
-		//noinspection deprecation
-		map2.put(8L, new RouteTripSpec(8L, //
-				0, MTrip.HEADSIGN_TYPE_STRING, "Intercity", //
-				1, MTrip.HEADSIGN_TYPE_STRING, "City Hall") //
-				.addTripSort(0, //
-						Arrays.asList(//
-								"1019", // City Hall Terminal
-								"1231", // Confederation College
-								"1006" // Intercity Shopping Centre
-						)) //
-				.addTripSort(1, //
-						Arrays.asList(//
-								"1006", // Intercity Shopping Centre
-								"1231", // Confederation College
-								"1019" // City Hall Terminal
-
-						)) //
-				.compileBothTripSort());
-		//noinspection deprecation
-		map2.put(12L, new RouteTripSpec(12L, //
-				0, MTrip.HEADSIGN_TYPE_STRING, "Intercity", //
-				1, MTrip.HEADSIGN_TYPE_STRING, "City Hall") //
-				.addTripSort(0, //
-						Arrays.asList(//
-								"1019", // City Hall Terminal
-								"1548", // ++
-								"1006" // Intercity Shopping Centre
-						)) //
-				.addTripSort(1, //
-						Arrays.asList(//
-								"1006", // Intercity Shopping Centre
-								"1850", // ++
-								"1019" // City Hall Terminal
-						)) //
-				.compileBothTripSort());
-		ALL_ROUTE_TRIPS2 = map2;
-	}
-
 	@Override
-	public int compareEarly(long routeId, @NotNull List<MTripStop> list1, @NotNull List<MTripStop> list2, @NotNull MTripStop ts1, @NotNull MTripStop ts2, @NotNull GStop ts1GStop, @NotNull GStop ts2GStop) {
-		if (ALL_ROUTE_TRIPS2.containsKey(routeId)) {
-			return ALL_ROUTE_TRIPS2.get(routeId).compare(routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop, this);
-		}
-		return super.compareEarly(routeId, list1, list2, ts1, ts2, ts1GStop, ts2GStop);
-	}
-
-	@NotNull
-	@Override
-	public ArrayList<MTrip> splitTrip(@NotNull MRoute mRoute, @Nullable GTrip gTrip, @NotNull GSpec gtfs) {
-		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
-			return ALL_ROUTE_TRIPS2.get(mRoute.getId()).getAllTrips();
-		}
-		return super.splitTrip(mRoute, gTrip, gtfs);
-	}
-
-	@NotNull
-	@Override
-	public Pair<Long[], Integer[]> splitTripStop(@NotNull MRoute mRoute, @NotNull GTrip gTrip, @NotNull GTripStop gTripStop, @NotNull ArrayList<MTrip> splitTrips, @NotNull GSpec routeGTFS) {
-		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
-			return SplitUtils.splitTripStop(mRoute, gTrip, gTripStop, routeGTFS, ALL_ROUTE_TRIPS2.get(mRoute.getId()), this);
-		}
-		return super.splitTripStop(mRoute, gTrip, gTripStop, splitTrips, routeGTFS);
-	}
-
-	@Override
-	public void setTripHeadsign(@NotNull MRoute mRoute, @NotNull MTrip mTrip, @NotNull GTrip gTrip, @NotNull GSpec gtfs) {
-		if (ALL_ROUTE_TRIPS2.containsKey(mRoute.getId())) {
-			return; // split
-		}
-		if (gTrip.getDirectionId() == null) {
-			final String tripHeadsign = gTrip.getTripHeadsignOrDefault();
-			if (mRoute.getId() == 1L) {
-				if (tripHeadsign.endsWith(" to City Hall") //
-						|| tripHeadsign.endsWith(" to Westfort")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
-					return;
-				}
-				if (tripHeadsign.endsWith(" to Waterfront") //
-						|| tripHeadsign.endsWith(" to Current River")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
-					return;
-				}
-			}
-			if (mRoute.getId() == 2L) {
-				if (tripHeadsign.endsWith(" to City Hall") //
-						|| tripHeadsign.endsWith(" to University") //
-						|| tripHeadsign.endsWith(" to Westfort")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
-					return;
-				}
-				if (tripHeadsign.endsWith(" to Machar") //
-						|| tripHeadsign.endsWith(" to Waterfront")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
-					return;
-				}
-			}
-			if (mRoute.getId() == 3L + RID_ENDS_WITH_C) { // 3C
-				if (tripHeadsign.endsWith(" to Castlegreen Dr")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
-					return;
-				}
-				if (tripHeadsign.endsWith(" to Northwood") //
-						|| tripHeadsign.endsWith(" to City Hall") //
-						|| tripHeadsign.endsWith(" to Waterfront")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
-					return;
-				}
-			}
-			if (mRoute.getId() == 3L + RID_ENDS_WITH_J) { // 3J
-				if (tripHeadsign.endsWith(" to Sherwood Dr.")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
-					return;
-				}
-				if (tripHeadsign.endsWith(" to Airport") //
-						|| tripHeadsign.endsWith(" to Waterfront")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
-					return;
-				}
-			}
-			if (mRoute.getId() == 3L + RID_ENDS_WITH_M) { // 3M
-				if (tripHeadsign.endsWith(" to City Hall") //
-						|| tripHeadsign.endsWith(" to Airport") //
-						|| tripHeadsign.endsWith(" to Northwood")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
-					return;
-				}
-				if (tripHeadsign.endsWith(" to Waterfront") //
-						|| tripHeadsign.endsWith(" to County Park") //
-						|| tripHeadsign.endsWith(" to Jumbo Gardens")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
-					return;
-				}
-			}
-			if (mRoute.getId() == 5L) {
-				if (tripHeadsign.endsWith(" to Westfort")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
-					return;
-				}
-				if (tripHeadsign.endsWith(" to Waterfront") //
-						|| tripHeadsign.endsWith(" to College")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
-					return;
-				}
-			}
-			if (mRoute.getId() == 7L) {
-				if (tripHeadsign.endsWith(" to Shuniah St.")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
-					return;
-				}
-				if (tripHeadsign.endsWith(" to Waterfront")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
-					return;
-				}
-			}
-			if (mRoute.getId() == 8L) {
-				if (tripHeadsign.endsWith(" to Intercity") //
-						|| tripHeadsign.endsWith(" to College")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
-					return;
-				}
-				if (tripHeadsign.endsWith(" to City Hall")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
-					return;
-				}
-			}
-			if (mRoute.getId() == 9L) {
-				if (tripHeadsign.endsWith(" to Intercity") //
-						|| tripHeadsign.endsWith(" to University")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
-					return;
-				}
-				if (tripHeadsign.endsWith(" to Waterfront")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
-					return;
-				}
-			}
-			if (mRoute.getId() == 10L) {
-				if (tripHeadsign.endsWith(" to College")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
-					return;
-				}
-				if (tripHeadsign.endsWith(" to County Park") //
-						|| tripHeadsign.endsWith(" to City Hall") //
-						|| tripHeadsign.endsWith(" to Waterfront")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
-					return;
-				}
-			}
-			if (mRoute.getId() == 11L) {
-				if (tripHeadsign.endsWith(" to Windsor St.")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
-					return;
-				}
-				if (tripHeadsign.endsWith(" to Waterfront")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
-					return;
-				}
-			}
-			if (mRoute.getId() == 13L) {
-				if (tripHeadsign.endsWith(" to County Fair")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
-					return;
-				}
-				if (tripHeadsign.endsWith(" to Waterfront")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
-					return;
-				}
-			}
-			if (mRoute.getId() == 14L) {
-				if (tripHeadsign.endsWith(" to Airport")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
-					return;
-				}
-				if (tripHeadsign.endsWith(" to Jumbo Gardens") //
-						|| tripHeadsign.endsWith(" to Waterfront") //
-						|| tripHeadsign.endsWith(" to City Hall")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
-					return;
-				}
-			}
-			if (mRoute.getId() == 16L) {
-				if (tripHeadsign.endsWith(" to College") //
-						|| tripHeadsign.endsWith(" to Waterfront")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 0);
-					return;
-				}
-				if (tripHeadsign.endsWith(" to City Hall")) {
-					mTrip.setHeadsignString(cleanTripHeadsign(tripHeadsign), 1);
-					return;
-				}
-			}
-			throw new MTLog.Fatal("%d, Unexpected trips %s!", mRoute.getId(), gTrip);
-		}
-		mTrip.setHeadsignString(
-				cleanTripHeadsign(gTrip.getTripHeadsignOrDefault()),
-				gTrip.getDirectionIdOrDefault()
-		);
+	public boolean directionSplitterEnabled() {
+		return true;
 	}
 
 	@Override
 	public boolean directionFinderEnabled() {
-		return false; // DISABLED because direction_id NOT provided
-	}
-
-	@Override
-	public boolean mergeHeadsign(@NotNull MTrip mTrip, @NotNull MTrip mTripToMerge) {
-		List<String> headsignsValues = Arrays.asList(mTrip.getHeadsignValue(), mTripToMerge.getHeadsignValue());
-		if (mTrip.getRouteId() == 1L) {
-			if (Arrays.asList( //
-					"City Hall", //
-					"Westfort" //
-			).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString("Westfort", mTrip.getHeadsignId());
-				return true;
-			}
-			if (Arrays.asList( //
-					"Waterfront", //
-					"Current River" //
-			).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString("Current River", mTrip.getHeadsignId());
-				return true;
-			}
-		}
-		if (mTrip.getRouteId() == 2L) {
-			if (Arrays.asList( //
-					"University", //
-					"City Hall", //
-					"Westfort" //
-			).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString("Westfort", mTrip.getHeadsignId());
-				return true;
-			}
-			if (Arrays.asList( //
-					"Machar", //
-					"Waterfront" //
-			).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString("Waterfront", mTrip.getHeadsignId());
-				return true;
-			}
-		}
-		if (mTrip.getRouteId() == 3L + RID_ENDS_WITH_C) { // 3C
-			if (Arrays.asList( //
-					"City Hall", //
-					"Waterfront", //
-					"Northwood" //
-			).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString("Northwood", mTrip.getHeadsignId());
-				return true;
-			}
-		}
-		if (mTrip.getRouteId() == 3L + RID_ENDS_WITH_J) { // 3J
-			if (Arrays.asList( //
-					"Waterfront", //
-					"Airport" //
-			).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString("Airport", mTrip.getHeadsignId());
-				return true;
-			}
-		}
-		if (mTrip.getRouteId() == 3L + RID_ENDS_WITH_M) { // 3M
-			if (Arrays.asList( //
-					"Airport", //
-					"Northwood", //
-					"City Hall" //
-			).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString("City Hall", mTrip.getHeadsignId());
-				return true;
-			}
-			if (Arrays.asList( //
-					"County Pk", //
-					"Jumbo Gdns", //
-					"Waterfront" //
-			).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString("Waterfront", mTrip.getHeadsignId());
-				return true;
-			}
-		}
-		if (mTrip.getRouteId() == 5L) {
-			if (Arrays.asList( //
-					"College", //
-					"Waterfront" //
-			).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString("Waterfront", mTrip.getHeadsignId());
-				return true;
-			}
-		}
-		if (mTrip.getRouteId() == 8L) {
-			if (Arrays.asList( //
-					"College", //
-					"Intercity" //
-			).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString("Intercity", mTrip.getHeadsignId());
-				return true;
-			}
-		}
-		if (mTrip.getRouteId() == 9L) {
-			if (Arrays.asList( //
-					"University", //
-					"Intercity" //
-			).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString("Intercity", mTrip.getHeadsignId());
-				return true;
-			}
-		}
-		if (mTrip.getRouteId() == 10L) {
-			if (Arrays.asList( //
-					"Waterfront", //
-					"City Hall", //
-					"County Pk" //
-			).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString("County Pk", mTrip.getHeadsignId());
-				return true;
-			}
-		}
-		if (mTrip.getRouteId() == 14L) {
-			if (Arrays.asList( //
-					"Waterfront", //
-					"City Hall", //
-					"Jumbo Gdns" //
-			).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString("Jumbo Gdns", mTrip.getHeadsignId());
-				return true;
-			}
-		}
-		if (mTrip.getRouteId() == 16L) {
-			if (Arrays.asList( //
-					"Waterfront", //
-					"College" //
-			).containsAll(headsignsValues)) {
-				mTrip.setHeadsignString("College", mTrip.getHeadsignId());
-				return true;
-			}
-		}
-		throw new MTLog.Fatal("Unexpected trips to merge %s & %s", mTrip, mTripToMerge);
+		return true;
 	}
 
 	@NotNull
@@ -633,7 +201,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	public int getStopId(@NotNull GStop gStop) {
 		//noinspection deprecation
 		final String stopId = gStop.getStopId();
-		if (stopId.length() > 0 && CharUtils.isDigitsOnly(stopId)) {
+		if (CharUtils.isDigitsOnly(stopId, true)) {
 			return Integer.parseInt(stopId);
 		}
 		throw new MTLog.Fatal("Stop doesn't have an ID (start with) %s!", gStop);
