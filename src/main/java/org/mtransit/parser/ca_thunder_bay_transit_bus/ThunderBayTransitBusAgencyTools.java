@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Locale;
 
 // http://www.thunderbay.ca/Living/Getting_Around/Thunder_Bay_Transit/Developers_-_Open_Data.htm
-// http://api.nextlift.ca/gtfs.zip
 public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 
 	public static void main(@NotNull String[] args) {
@@ -121,7 +120,7 @@ public class ThunderBayTransitBusAgencyTools extends DefaultAgencyTools {
 	}
 
 	@Override
-	public boolean directionSplitterEnabled() {
+	public boolean directionSplitterEnabled(long routeId) {
 		return true;
 	}
 
